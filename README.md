@@ -5,6 +5,9 @@ This is the accompanying code for the ICML 2026 paper:
 **Dropout Universality: Scaling Laws and Optimal Scheduling at the Edge-of-Chaos**  
 Lucas Fernandez Sarmiento. Accepted at ICML 2026.
 
+The paper PDF is included here:
+[paper/dropout-universality-scaling-laws-optimal-scheduling-icml2026.pdf](paper/dropout-universality-scaling-laws-optimal-scheduling-icml2026.pdf)
+
 The paper studies how dropout changes mean-field signal propagation in wide neural networks. The main point is that dropout does not simply destroy the edge-of-chaos fixed-point picture; it displaces it, giving a small field in the correlation dynamics. That field leads to scaling laws, different smooth/kinked activation classes, and a simple prescription for depth-dependent dropout schedules.
 
 This repository keeps the experimental side of that story in one place. It contains the saved runs used for the paper figures, the notebooks used to produce or check those runs, and a small shared plotting/utility package so the figures can be remade without rerunning the training jobs.
@@ -17,6 +20,7 @@ scripts/             Scripts for remaking the figures
 results/             Saved runs used in the paper
 figures/paper/       Figures used in the paper
 notebooks/           Notebooks for reruns and small changes
+paper/               A copy of the paper PDF
 ```
 
 The exploratory ResNet trial is intentionally not included. It was useful while thinking through the project, but it is not part of the reported experiments.
