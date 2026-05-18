@@ -138,8 +138,126 @@ def make_critical_exponents() -> None:
     plt.close(fig)
 
 
-def _smooth_m(t, h):
-    return 0.5 * (-t + np.sqrt(t * t + 4.0 * h))
+_GH_N = 60
+_GH_X, _GH_W = hermgauss(_GH_N)
+_GH_Z = np.sqrt(2.0) * _GH_X
+_GH_W1 = _GH_W / np.sqrt(np.pi)
+_GH_Z1, _GH_Z2 = _GH_Z[:, None], _GH_Z[None, :]
+_GH_W2 = (_GH_W[:, None] * _GH_W[None, :]) / np.pi
+
+
+def _gh1(values: np.ndarray) -> float:
+    return float(np.sum(_GH_W1 * values))
+
+
+def _gh2(values: np.ndarray) -> float:
+    return float(np.sum(_GH_W2 * values))
+
+
+def _tanh_phi(x: np.ndarray) -> np.ndarray:
+    return np.tanh(x)
+
+
+def _tanh_phi_prime(x: np.ndarray) -> np.ndarray:
+    return 1.0 / np.cosh(x) ** 2
+
+
+def _tanh_phi_double_prime(x: np.ndarray) -> np.ndarray:
+    return -2.0 * np.tanh(x) * _tanh_phi_prime(x)
+
+
+def _bisect_root(fn, lo: float, hi: float, iters: int = 90) -> float:
+    flo, fhi = fn(lo), fn(hi)
+    if flo == 0:
+        return lo
+    if fhi == 0:
+        return hi
+    if flo * fhi > 0:
+        raise ValueError("Root is not bracketed")
+    for _ in range(iters):
+        mid = 0.5 * (lo + hi)
+        fm = fn(mid)
+        if flo * fm <= 0:
+            hi, fhi = mid, fm
+        else:
+            lo, flo = mid, fm
+    return 0.5 * (lo + hi)
+
+
+def _solve_qstar_tanh(sigma_w2: float, sigma_b2: float, rho: float) -> float:
+    q = sigma_b2 + 1.0
+    for _ in range(5000):
+        ef2 = _gh1(_tanh_phi(np.sqrt(max(q, 0.0)) * _GH_Z) ** 2)
+        q_new = (sigma_w2 / rho) * ef2 + sigma_b2
+        if abs(q_new - q) < 1e-13 * max(1.0, q_new):
+            return float(q_new)
+        q = 0.5 * (q + q_new)
+    return float(q)
+
+
+def _tanh_chi_g_h(sigma_w2: float, sigma_b2: float, rho: float) -> tuple[float, float, float, float]:
+    q = _solve_qstar_tanh(sigma_w2, sigma_b2, rho)
+    sq = np.sqrt(q)
+    ef2 = _gh1(_tanh_phi(sq * _GH_Z) ** 2)
+    efp2 = _gh1(_tanh_phi_prime(sq * _GH_Z) ** 2)
+    efpp2 = _gh1(_tanh_phi_double_prime(sq * _GH_Z) ** 2)
+    chi = sigma_w2 * efp2
+    g = sigma_w2 * q * efpp2
+    h = 1.0 - (sigma_w2 * ef2 + sigma_b2) / q
+    return q, chi, g, h
+
+
+def _F_tanh(c: float, sigma_w2: float, sigma_b2: float, qstar: float) -> float:
+    c = float(np.clip(c, -1.0 + 1e-15, 1.0 - 1e-15))
+    sq = np.sqrt(qstar)
+    s = np.sqrt(max(0.0, 1.0 - c * c))
+    u1 = sq * _GH_Z1
+    u2 = sq * (c * _GH_Z1 + s * _GH_Z2)
+    return float((sigma_w2 * _gh2(_tanh_phi(u1) * _tanh_phi(u2)) + sigma_b2) / qstar)
+
+
+def _cstar_tanh(sigma_w2: float, sigma_b2: float, rho: float) -> float:
+    q, chi, g, h = _tanh_chi_g_h(sigma_w2, sigma_b2, rho)
+    if abs(h) < 1e-15 and chi <= 1.0:
+        return 1.0
+
+    def fixed_point_gap(m: float) -> float:
+        return _F_tanh(1.0 - m, sigma_w2, sigma_b2, q) - (1.0 - m)
+
+    disc = (chi - 1.0) ** 2 + 2.0 * g * h
+    m0 = np.clip((chi - 1.0 + np.sqrt(max(disc, 0.0))) / max(g, 1e-16), 1e-8, 1.0)
+    lo, hi = max(1e-12, m0 / 100.0), min(1.9, m0 * 100.0)
+    flo, fhi = fixed_point_gap(lo), fixed_point_gap(hi)
+    for _ in range(80):
+        if flo * fhi < 0:
+            break
+        lo, hi = max(1e-12, lo / 2.0), min(1.9, hi * 2.0)
+        flo, fhi = fixed_point_gap(lo), fixed_point_gap(hi)
+    if flo * fhi > 0:
+        grid = np.logspace(-12, 0, 800)
+        vals = np.array([fixed_point_gap(m) for m in grid])
+        idx = np.where(vals[:-1] * vals[1:] < 0)[0]
+        if len(idx) == 0:
+            return 1.0 - float(m0)
+        lo, hi = grid[idx[0]], grid[idx[0] + 1]
+    return 1.0 - _bisect_root(fixed_point_gap, lo, hi)
+
+
+def _tune_sigw2_for_chi_tanh(target_chi: float, sigma_b2: float, rho: float) -> float:
+    return _bisect_root(lambda sw2: _tanh_chi_g_h(sw2, sigma_b2, rho)[1] - target_chi, 0.05, 20.0)
+
+
+def _smooth_scaling_points(hs: np.ndarray, t_vals: np.ndarray) -> np.ndarray:
+    rows = []
+    sigma_b2 = 0.1
+    for h_proxy in hs:
+        rho = 1.0 / (1.0 + h_proxy)
+        for t in t_vals:
+            sigma_w2 = _tune_sigw2_for_chi_tanh(1.0 + t, sigma_b2, rho)
+            _, _, g, h = _tanh_chi_g_h(sigma_w2, sigma_b2, rho)
+            m = 1.0 - _cstar_tanh(sigma_w2, sigma_b2, rho)
+            rows.append((h_proxy, t, h, g, m))
+    return np.array(rows)
 
 
 def _kink_m(t, h):
@@ -170,31 +288,38 @@ def make_scaling_collapse(kind: str) -> None:
 def _draw_scaling_collapse(kind: str, fig, axes) -> None:
     is_smooth = kind == "smooth"
     hs = np.array([1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2, 2e-2, 5e-2, 1e-1])
-    t = np.linspace(-0.3, 0.3, 70)
-    for color, h in zip(FIELD_PALETTE, hs):
-        m = _smooth_m(t, h) if is_smooth else _kink_m(t, h)
-        axes[0].plot(t, m, "o", color=color, markersize=3, label=rf"$h \approx {h:.0e}$")
-        if is_smooth:
-            tau, mt = t / np.sqrt(h), m / np.sqrt(h)
-        else:
+    t = np.linspace(-0.3, 0.3, 50 if is_smooth else 70)
+    if is_smooth:
+        smooth = _smooth_scaling_points(hs, t)
+        h_proxy, t_data, h_data, g_data, m_data = smooth.T
+        for color, h in zip(FIELD_PALETTE, hs):
+            mask = np.isclose(h_proxy, h)
+            tau = -t_data[mask] / np.sqrt(2.0 * g_data[mask] * h_data[mask])
+            mt = m_data[mask] * np.sqrt(g_data[mask] / (2.0 * h_data[mask]))
+            axes[0].plot(t_data[mask], m_data[mask], "o", color=color, markersize=3, label=rf"$h \approx {h:.0e}$")
+            axes[1].plot(tau, mt, "o", color=color, markersize=3, label=rf"$h \approx {h:.0e}$")
+    else:
+        for color, h in zip(FIELD_PALETTE, hs):
+            m = _kink_m(t, h)
             tau, mt = t / h ** (1 / 3), m / h ** (2 / 3)
-        axes[1].plot(tau, mt, "o", color=color, markersize=3, label=rf"$h \approx {h:.0e}$")
+            axes[0].plot(t, m, "o", color=color, markersize=3, label=rf"$h \approx {h:.0e}$")
+            axes[1].plot(tau, mt, "o", color=color, markersize=3, label=rf"$h \approx {h:.0e}$")
 
     tt = np.linspace(-1, 2, 400)
-    theory = 0.5 * (-tt + np.sqrt(tt * tt + 4.0)) if is_smooth else _kink_m(tt, np.ones_like(tt))
+    theory = np.sqrt(1.0 + tt * tt) - tt if is_smooth else _kink_m(tt, np.ones_like(tt))
     axes[1].plot(tt, theory, color=COLORS["baseline"], lw=2.4, label="Theory")
 
     title = "Smooth" if is_smooth else "Kinked"
-    axes[0].set_title(f"{title}: raw data")
+    axes[0].set_title(f"{title}: Raw Data")
     axes[0].set_xlabel(r"$t = \chi-1$")
     axes[0].set_ylabel(r"$m = 1-c_\ast$")
-    axes[1].set_title(f"{title}: universal collapse")
+    axes[1].set_title(f"{title}: Universal Collapse")
     axes[1].set_xlabel(r"$\tilde t$")
     axes[1].set_ylabel(r"$\tilde{m}$")
     axes[1].set_xlim(-1, 2)
     axes[1].set_ylim(0, 2.2 if is_smooth else 1.8)
-    for ax in axes:
-        ax.legend(ncol=2, loc="upper right", borderaxespad=0.4, columnspacing=0.9, handletextpad=0.4)
+    axes[0].legend(ncol=2, loc="upper left", borderaxespad=0.4, columnspacing=0.9, handletextpad=0.4)
+    axes[1].legend(ncol=2, loc="upper right", borderaxespad=0.4, columnspacing=0.9, handletextpad=0.4)
 
     name = "smooth_scaling_collapse.png" if is_smooth else "kinked_scaling_collapse.png"
     fig.tight_layout(pad=1.0, w_pad=1.4)
