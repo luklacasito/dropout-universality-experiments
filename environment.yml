@@ -1,0 +1,14 @@
+name: dropout-mft-experiments
+channels:
+  - conda-forge
+  - pytorch
+dependencies:
+  - python=3.11
+  - numpy>=1.24
+  - matplotlib>=3.7
+  - pytorch>=2.0
+  - torchvision>=0.16
+  - tqdm>=4.65
+  - pip
+  - pip:
+      - wandb>=0.16
