@@ -12,4 +12,5 @@ dependencies:
   - tqdm=4.65.0
   - pip
   - pip:
+      - mup==1.0.0
       - wandb==0.24.2
