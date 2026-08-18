@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any, Iterator, Literal
 import numpy as np
 
 if TYPE_CHECKING:
-    from .benchmark_suite import BenchmarkTrialSpec
+    from dropout_mft.experiments.benchmark.protocol import BenchmarkTrialSpec
     from .training import DatasetBundle
 
 
@@ -74,7 +74,10 @@ def benchmark_wandb_config(
     """Build the searchable W&B config from the immutable trial inputs."""
 
     # Imported lazily to keep importing this module independent of torch.
-    from .benchmark_suite import _schedule_record, benchmark_profile_layers
+    from dropout_mft.experiments.benchmark.protocol import (
+        _schedule_record,
+        benchmark_profile_layers,
+    )
 
     schedule = _schedule_record(spec)
     return {
