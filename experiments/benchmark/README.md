@@ -55,7 +55,7 @@ All arms spend the **same mean dropout budget** at depth 6:
 | `none` | all zero | Does dropout help on this task at all |
 
 `big_step` intentionally breaks the 0.20 cap, exactly as it does in
-`legacy_comparison`, so it is reported as an extension rather than a
+the original CIFAR-10 budget-control experiment, so it is reported as an extension rather than a
 cap-matched primary arm. At the top of the budget grid (`p̄ = 0.20`) it reaches
 `p = 0.60` in its first two layers, which is a qualitatively different regime;
 expect the response curve to turn over there and report it rather than trimming
@@ -81,8 +81,8 @@ this experiment could quietly produce a wrong answer:
 - **Each profile is tuned independently** (`test_each_profile_is_tuned_independently`).
   The profiles differ in effective regularization strength, so a shared learning
   rate silently favours whichever arm the grid was centred on. Reusing the
-  front-loaded arm's hyperparameters for uniform is the single most common way
-  to manufacture this result, and a reviewer or interviewer will look for it.
+  front-loaded arm's hyperparameters for uniform would confound allocation
+  with hyperparameter choice.
 - **Only `confirm` may touch the test set**
   (`test_only_the_confirmation_stage_may_touch_the_test_set`). `BenchmarkTrialSpec`
   raises if any other stage sets `evaluate_test`. Selection reads validation loss

@@ -13,6 +13,7 @@ datasets/
 figures/**/*.png
 !figures/paper/theory/smooth_scaling_collapse.png
 paper/*.pdf
+!paper/dropout-universality-v2.pdf
 results/**/*.pkl
 *.log
 *.tmp

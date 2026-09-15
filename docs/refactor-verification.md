@@ -87,5 +87,35 @@ git archive b77ae162b0edf5dc4b008927ae0b2bbf32c845c6 | tar -x -C /tmp/dropout-or
 ```
 
 The historical archives mentioned above are local recovery records, not required
-files in a fresh GitHub checkout. The RNN bundles are intentionally excluded from
-formatting because their source bytes identify existing runs.
+files in a fresh GitHub checkout. At that point the RNN bundles were excluded from formatting because their
+source bytes identified existing runs. They are now archived outside the repository.
+
+
+## V2 scope and paper verification (2026-09-15)
+
+The maintained tree now contains original-paper reproduction, scale transfer,
+and multi-dataset benchmarks. RNN, legacy-rerun, and Optiver code, tests, and
+visualizations were moved to a local archive outside Git. All 72 moved files
+were verified by SHA-256; a complete source snapshot was also retained. These
+files remain accessible in historical commits; no history was rewritten.
+
+| Check | Result |
+|---|---|
+| Maintained pytest suite | 366 passed |
+| Ruff lint/format and shell syntax | Passed |
+| Retained training/resume fingerprints | All 63 identical to the pre-v2 tree |
+| Benchmark export | 618 completed confirmation runs; every epoch recovered |
+| Benchmark comparisons | 21 cohorts; paired seeds and split identity checked |
+| New appendix figures | 21 benchmark figures and one 30-run geometry pilot |
+| Original result table | Six final-epoch comparisons recomputed from saved arrays |
+
+New evidence checks reject duplicate seeds and changed data splits, exclude
+incomplete candidate arms from winner selection, preserve negative results,
+and never substitute a baseline from another cohort. The archived experiments
+are no longer part of `make check` or the training fingerprint script.
+
+The figure/table build is offline. Its full manuscript integration was compiled
+with LaTeX and visually checked. Two linear follow-ups lack recovered uniform
+baselines, two Amazon 20k MLP candidate arms have only four seeds, and a complete
+width-transfer grid is unavailable. These limits are stated in the results index
+and manuscript rather than inferred away.

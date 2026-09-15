@@ -1,6 +1,6 @@
 PYTHON ?= python
 
-.PHONY: check lint format test test-rnn check-shell
+.PHONY: check lint format test check-shell figures
 
 check: lint check-shell test
 
@@ -12,14 +12,11 @@ format:
 	$(PYTHON) -m ruff check --fix .
 	$(PYTHON) -m ruff format .
 
-test: test-rnn
+test:
 	$(PYTHON) -m pytest -q
 
-# Run each standalone study in a fresh process: each has its own run.py module.
-test-rnn:
-	$(PYTHON) -m unittest discover -s experiments/rnn_pilot -v
-	$(PYTHON) -m unittest discover -s experiments/rnn_ptb -v
-	$(PYTHON) -m unittest discover -s experiments/rnn_ptb_linear -v
+figures:
+	MPLBACKEND=Agg $(PYTHON) experiments/paper/make_appendix.py
 
 check-shell:
 	@find experiments -type f \( -name '*.sh' -o -name '*.sbatch' \) -exec bash -c 'for script do bash -n "$$script" || exit; done' _ {} +

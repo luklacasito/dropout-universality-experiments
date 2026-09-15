@@ -1,0 +1,19 @@
+\begin{table*}[t]
+\centering
+\caption{Original paper experiments, recomputed from the saved arrays at the final epoch. These endpoints differ from the validation-selected checkpoints in Table~\ref{tab:benchmark_results}. Best denotes the lowest observed mean final test loss among the compared nonuniform schedules. Uncertainties are SEM; accuracies are percentages.}
+\label{tab:loss_improvements}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llrlrrrr@{}}
+\toprule
+Dataset / setting & Model & Seeds & Best nonuniform & Uniform CE & Best CE & Reduction & Acc. U / best \\
+\midrule
+CIFAR-10 & MLP schedules & 25 & Step early & \(2.223\pm0.009\) & \(1.826\pm0.005\) & +17.86\% & 41.84 / 42.67 \\
+CIFAR-10 & MLP budget controls & 25 & Big step & \(2.223\pm0.009\) & \(1.721\pm0.002\) & +22.61\% & 41.84 / 42.92 \\
+CIFAR-10 & ReLU p=0.1 & 3 & Big step & \(3.132\pm0.022\) & \(2.022\pm0.023\) & +35.43\% & 40.45 / 42.49 \\
+CIFAR-10 & GELU p=0.1 & 10 & Big step & \(2.605\pm0.015\) & \(1.829\pm0.007\) & +29.79\% & 41.44 / 42.06 \\
+CIFAR-100 & ViT & 10 & Linear decreasing & \(3.728\pm0.016\) & \(3.573\pm0.014\) & +4.15\% & 48.61 / 49.27 \\
+CIFAR-10 & ViT both-block ablation & 5 & Step early & \(1.655\pm0.012\) & \(1.551\pm0.009\) & +6.32\% & 74.78 / 75.30 \\
+\bottomrule
+\end{tabular}
+\end{table*}

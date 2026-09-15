@@ -1,1 +1,0 @@
-"""Optiver experiment tests."""

@@ -5,7 +5,20 @@ Scheduling at the Edge-of-Chaos** ([paper](https://arxiv.org/abs/2605.21648)).
 
 The experiments ask how the amount and placement of dropout across network
 layers affect training and generalization. This repo contains the paper
-reproductions and follow-up studies on MLPs, transformers, and recurrent models.
+reproductions and follow-up studies on MLPs and transformers.
+
+## Read the results
+
+- [Results table and experiment index](paper/README.md)
+- [Experimental appendix](paper/experimental_appendix.tex)
+- [Code map](docs/code-map.md)
+
+Run `make figures` after installation to rebuild the v2 figures and result tables
+offline from the saved evidence.
+
+Three experiment families are maintained: original paper reproduction, profile
+and width-transfer studies, and the multi-dataset benchmark. RNN, legacy-rerun,
+and Optiver workflows are archived outside this repository.
 
 ## Get started
 
@@ -35,9 +48,6 @@ python -m pip install -e '.[benchmarks]'
 | [Paper](experiments/paper/) | Rebuild figures from saved results; no training needed | `python experiments/paper/make_figures.py --all` |
 | [Scale transfer](experiments/scale_transfer/) | Compare standard and μP parameterizations across widths | `python experiments/scale_transfer/run.py smoke` |
 | [Benchmark](experiments/benchmark/) | Compare dropout profiles across five datasets and two architectures | `python -m dropout_mft.experiments.benchmark --help` |
-| [Legacy](experiments/legacy/) | Reproduce the historical CIFAR-10 MLP comparison | `python experiments/legacy/run.py smoke` |
-| [Optiver](experiments/optiver/) | Run volatility-prediction studies with audited data splits | `python experiments/optiver/run_canary.py --help` |
-| [RNN studies](docs/rnn-studies.md) | Synthetic recall, Penn Treebank, and a linear-profile follow-up | Read the guide for setup and individual commands |
 
 Each experiment README describes its scientific protocol, data requirements,
 outputs, and Slurm launch commands. **A smoke check verifies the implementation;
@@ -84,11 +94,12 @@ scientific protocol. Test data is reserved for the confirmation stage.
 experiments/          Commands, experiment guides, and cluster launchers
 src/dropout_mft/      Shared models, training, schedules, results, and analysis
   experiments/       Study definitions and study-specific analysis
-tests/              Tests for the package and experiment commands
+tests/               Tests for the package and experiment commands
 notebooks/           Published notebook reproductions
-results/             Saved paper results
+results/             Saved paper results and auditable v2 run exports
+paper/               Results table, appendix, and manuscript PDF
 figures/paper/       Paper figures
-docs/               Code map, contributor guide, and verification notes
+docs/                Code map, contributor guide, and verification notes
 ```
 
 Read the [code map](docs/code-map.md) for the path from a command to a model and
@@ -103,8 +114,7 @@ python -m pip install -r requirements-dev.txt
 make check
 ```
 
-This runs lint, formatting, shell syntax checks, the package tests, and all three
-standalone RNN test suites. Tests use small CPU cases and synthetic data; they do
+This runs lint, formatting, shell syntax checks, and the package tests. Tests use small CPU cases and synthetic data; they do
 not submit cluster jobs or require W&B. See [verification notes](docs/refactor-verification.md)
 for the deterministic comparisons used to validate the consolidation.
 

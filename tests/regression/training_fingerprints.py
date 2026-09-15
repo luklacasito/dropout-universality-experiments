@@ -21,7 +21,6 @@ import torch  # noqa: E402
 
 from dropout_mft.experiments.benchmark import protocol as b  # noqa: E402
 from dropout_mft.experiments.benchmark.datasets import BENCHMARK_SPECS  # noqa: E402
-from dropout_mft.experiments.legacy import protocol as legacy  # noqa: E402
 from dropout_mft.experiments.scale_transfer import protocol as scale  # noqa: E402
 from dropout_mft.training import DatasetBundle, synthetic_bundle  # noqa: E402
 
@@ -126,8 +125,7 @@ with tempfile.TemporaryDirectory() as temporary:
         output = temporary / f"{len(results)}.npz"
         first = runner(spec, bundle, output, device="cpu", **kwargs)
         fingerprint = {"result": digest(scientific_result(first))}
-        if runner is not legacy.run_legacy_trial:
-            fingerprint["model_state"] = states["last"]
+        fingerprint["model_state"] = states["last"]
         if "checkpoint_path" in kwargs:
             checkpoint = torch.load(
                 kwargs["checkpoint_path"], map_location="cpu", weights_only=True
@@ -255,39 +253,6 @@ with tempfile.TemporaryDirectory() as temporary:
         test=images(bundle.test),
     )
     record("scale/vit", scale.run_trial, spec, bundle)
-
-    for profile in legacy.ALL_LEGACY_PROFILE_IDS:
-        spec = legacy.LegacyTrialSpec(
-            profile,
-            100,
-            depth=3,
-            width=8,
-            epochs=2,
-            batch_size=4,
-            train_size=8,
-            test_size=4,
-            max_dropout=0.3 if profile == "big_step" else 0.2,
-        )
-        legacy_bundle = legacy.LegacyDatasetBundle(
-            bundle.train, bundle.test, "fixed", "train", "test", "synthetic"
-        )
-        # Legacy CIFAR has ten classes, unlike the ViT bridge above.
-        legacy_bundle = replace(
-            legacy_bundle,
-            train=torch.utils.data.TensorDataset(
-                bundle.train.tensors[0], bundle.train.tensors[1] % 10
-            ),
-            test=torch.utils.data.TensorDataset(
-                bundle.test.tensors[0], bundle.test.tensors[1] % 10
-            ),
-        )
-        record(
-            f"legacy/{profile}",
-            legacy.run_legacy_trial,
-            spec,
-            legacy_bundle,
-            provenance={},
-        )
 
 Path(sys.argv[2]).write_text(json.dumps(results, indent=2, sort_keys=True) + "\n")
 print(

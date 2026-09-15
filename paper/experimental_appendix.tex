@@ -1,0 +1,483 @@
+\clearpage
+\section{Extended Experiments Across Datasets}
+\label{app:extended_experiments}
+The extended experiments ask how spatial allocation behaves across tasks, architectures, and training-data budgets. We preserve each cohort's split, optimization settings, and random seeds; cohorts are not pooled across weight decay or training duration. Table~\ref{tab:benchmark_results} reports every recovered confirmation comparison, including missing baseline information and incomplete candidate coverage.
+\paragraph{Evaluation and selection.} Each profile's learning rate and mean dropout were selected by validation screening before confirmation. The recorded test loss is evaluated at the minimum-validation-loss checkpoint. Some cohorts also record a fixed-final-epoch test endpoint; that endpoint is reported separately below when available. The best nonuniform profile in the main table is selected descriptively from confirmation test means. Its improvement is therefore subject to winner-selection optimism and is not a prespecified significance claim. Profiles with missing paired seeds remain visible below but are ineligible to win the main table.
+\paragraph{Figure convention.} We use the original paper's serif typography, schedule palette, four-panel layout, and mean $\pm$ SEM bands. The newer runs record training and validation at every epoch, so the right-hand panels show validation rather than invented test trajectories. The tables report the observed test endpoints. Training loss uses a logarithmic axis.
+\paragraph{Budgets and architecture.} The extended benchmark compares tuned mean dropout probabilities; the tuned probability may differ across profiles, so these comparisons do not isolate placement at an equal budget. The big-step profile is cap-exempt, and its local probability can exceed the primary $0.20$ cap. Transformer profiles are empirical architecture extensions; the MLP reference-field diagnostic is not a derived Transformer correlation recursion.
+\paragraph{Coverage.} The Amazon 20,000-example MLP cohort has four of five runs for each linear direction; other recorded candidates have their full seed sets. Two linear follow-up cohorts contain their selected linear profile and tuned no-dropout control, but their matching uniform-baseline source has not been recovered in this export. Their uniform comparisons remain unreported rather than borrowing a zero-weight-decay baseline from another protocol.
+\clearpage
+\subsection{Amazon Reviews / MLP / Zero weight decay}
+Depth 12, width 256; 20,000/5,000/10,000 training/validation/test examples; 50 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-01-amazon_reviews-mlp.pdf}
+\caption{Amazon Reviews / MLP / Zero weight decay. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-01-amazon_reviews-mlp}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 1e-03 & \(0.417\pm0.006\) & \(81.44\pm0.19\) & -- \\
+Uniform & 5 & 0.10 & 3e-03 & \(0.428\pm0.008\) & \(81.12\pm0.19\) & -- \\
+Step early & 5 & 0.10 & 1e-03 & \(0.406\pm0.003\) & \(82.34\pm0.09\) & -- \\
+Big step & 5 & 0.15 & 3e-04 & \(0.419\pm0.009\) & \(82.17\pm0.58\) & -- \\
+Linear decreasing & 5 & 0.10 & 1e-03 & \(0.408\pm0.003\) & \(81.99\pm0.11\) & -- \\
+Linear increasing & 5 & 0.10 & 1e-03 & \(0.410\pm0.004\) & \(81.78\pm0.12\) & -- \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.022\pm0.007\) (SEM).
+\clearpage
+\subsection{Amazon Reviews / Transformer / Zero weight decay}
+Depth 12, width 256; 20,000/5,000/10,000 training/validation/test examples; 50 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-02-amazon_reviews-transformer.pdf}
+\caption{Amazon Reviews / Transformer / Zero weight decay. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-02-amazon_reviews-transformer}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 1e-04 & \(0.303\pm0.005\) & \(88.05\pm0.20\) & -- \\
+Uniform & 5 & 0.10 & 3e-04 & \(0.293\pm0.004\) & \(88.48\pm0.17\) & -- \\
+Step early & 5 & 0.05 & 1e-04 & \(0.292\pm0.006\) & \(88.27\pm0.29\) & -- \\
+Big step & 5 & 0.05 & 3e-04 & \(0.292\pm0.008\) & \(88.45\pm0.11\) & -- \\
+Linear decreasing & 5 & 0.05 & 1e-03 & \(0.324\pm0.011\) & \(86.64\pm0.65\) & -- \\
+Linear increasing & 5 & 0.05 & 3e-04 & \(0.283\pm0.002\) & \(88.38\pm0.16\) & -- \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.010\pm0.004\) (SEM).
+\clearpage
+\subsection{Speech Commands / MLP / Zero weight decay}
+Depth 12, width 256; 20,020/5,005/10,010 training/validation/test examples; 50 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-03-speech_commands-mlp.pdf}
+\caption{Speech Commands / MLP / Zero weight decay. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-03-speech_commands-mlp}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 1e-03 & \(1.203\pm0.011\) & \(67.16\pm0.35\) & -- \\
+Uniform & 5 & 0.10 & 1e-03 & \(1.073\pm0.006\) & \(72.23\pm0.12\) & -- \\
+Step early & 5 & 0.05 & 1e-03 & \(0.937\pm0.003\) & \(74.06\pm0.13\) & -- \\
+Big step & 5 & 0.05 & 1e-03 & \(0.950\pm0.004\) & \(74.07\pm0.11\) & -- \\
+Linear decreasing & 5 & 0.05 & 1e-03 & \(1.002\pm0.005\) & \(73.87\pm0.45\) & -- \\
+Linear increasing & 5 & 0.05 & 1e-03 & \(1.202\pm0.009\) & \(69.40\pm0.54\) & -- \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.136\pm0.007\) (SEM).
+\clearpage
+\subsection{Speech Commands / Transformer / Zero weight decay}
+Depth 12, width 256; 20,020/5,005/10,010 training/validation/test examples; 50 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-04-speech_commands-transformer.pdf}
+\caption{Speech Commands / Transformer / Zero weight decay. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-04-speech_commands-transformer}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 3e-04 & \(0.807\pm0.018\) & \(77.65\pm0.65\) & -- \\
+Uniform & 5 & 0.15 & 3e-04 & \(0.743\pm0.017\) & \(79.54\pm0.61\) & -- \\
+Step early & 5 & 0.05 & 1e-04 & \(0.852\pm0.027\) & \(77.85\pm0.64\) & -- \\
+Big step & 5 & 0.15 & 3e-04 & \(0.707\pm0.036\) & \(81.07\pm0.89\) & -- \\
+Linear decreasing & 5 & 0.20 & 3e-04 & \(0.711\pm0.033\) & \(81.27\pm1.05\) & -- \\
+Linear increasing & 5 & 0.10 & 3e-04 & \(0.832\pm0.022\) & \(77.67\pm0.67\) & -- \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.036\pm0.037\) (SEM).
+\clearpage
+\subsection{Amazon Reviews / MLP / 2,000 train}
+Depth 12, width 256; 2,000/5,000/10,000 training/validation/test examples; 100 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-05-amazon_reviews-mlp.pdf}
+\caption{Amazon Reviews / MLP / 2,000 train. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-05-amazon_reviews-mlp}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 3e-03 & \(0.697\pm0.008\) & \(58.10\pm3.88\) & \(8.008\pm0.711\) \\
+Uniform & 5 & 0.20 & 3e-03 & \(0.672\pm0.011\) & \(59.26\pm3.53\) & \(8.060\pm0.724\) \\
+Step early & 5 & 0.05 & 1e-03 & \(0.660\pm0.007\) & \(64.71\pm1.24\) & \(3.345\pm0.239\) \\
+Big step & 5 & 0.10 & 1e-03 & \(0.643\pm0.008\) & \(67.12\pm1.18\) & \(3.607\pm0.190\) \\
+Linear decreasing & 5 & 0.15 & 1e-03 & \(0.651\pm0.009\) & \(67.00\pm1.46\) & \(3.356\pm0.120\) \\
+Linear increasing & 5 & 0.05 & 1e-03 & \(0.693\pm0.003\) & \(52.91\pm1.35\) & \(4.705\pm0.285\) \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.029\pm0.011\) (SEM).
+\clearpage
+\subsection{Amazon Reviews / Transformer / 2,000 train}
+Depth 12, width 256; 2,000/5,000/10,000 training/validation/test examples; 100 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-06-amazon_reviews-transformer.pdf}
+\caption{Amazon Reviews / Transformer / 2,000 train. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-06-amazon_reviews-transformer}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 3e-04 & \(0.489\pm0.012\) & \(80.43\pm0.25\) & \(1.616\pm0.043\) \\
+Uniform & 5 & 0.20 & 3e-04 & \(0.494\pm0.023\) & \(78.51\pm1.34\) & \(1.775\pm0.021\) \\
+Step early & 5 & 0.20 & 3e-04 & \(0.520\pm0.007\) & \(79.35\pm1.64\) & \(1.796\pm0.029\) \\
+Big step & 5 & 0.05 & 1e-04 & \(0.551\pm0.038\) & \(78.11\pm0.81\) & \(1.626\pm0.017\) \\
+Linear decreasing & 5 & 0.20 & 3e-04 & \(0.533\pm0.020\) & \(79.88\pm1.43\) & \(1.790\pm0.032\) \\
+Linear increasing & 5 & 0.05 & 3e-04 & \(0.530\pm0.024\) & \(80.28\pm0.68\) & \(1.704\pm0.023\) \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(0.026\pm0.022\) (SEM).
+\clearpage
+\subsection{Amazon Reviews / MLP / 20,000 train}
+Depth 12, width 256; 20,000/5,000/10,000 training/validation/test examples; 100 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-07-amazon_reviews-mlp.pdf}
+\caption{Amazon Reviews / MLP / 20,000 train. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-07-amazon_reviews-mlp}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 1e-03 & \(0.417\pm0.005\) & \(81.43\pm0.19\) & \(5.286\pm0.383\) \\
+Uniform & 5 & 0.15 & 1e-03 & \(0.422\pm0.005\) & \(81.61\pm0.08\) & \(6.379\pm0.588\) \\
+Step early & 5 & 0.10 & 1e-03 & \(0.407\pm0.004\) & \(81.94\pm0.22\) & \(4.719\pm0.313\) \\
+Big step & 5 & 0.10 & 3e-04 & \(0.409\pm0.003\) & \(82.41\pm0.16\) & \(2.619\pm0.051\) \\
+Linear decreasing & 4 & 0.10 & 3e-04 & \(0.415\pm0.002\) & \(81.83\pm0.21\) & \(3.416\pm0.249\) \\
+Linear increasing & 4 & 0.10 & 1e-03 & \(0.417\pm0.007\) & \(81.67\pm0.23\) & \(12.613\pm1.301\) \\
+\bottomrule\end{tabular}\end{center}
+The linear profiles are incomplete ($n=4$); their curves and endpoint estimates use only the recorded runs. The main table selects among profiles with all five paired seeds.
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.015\pm0.006\) (SEM).
+\clearpage
+\subsection{Amazon Reviews / Transformer / 20,000 train}
+Depth 12, width 256; 20,000/5,000/10,000 training/validation/test examples; 100 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-08-amazon_reviews-transformer.pdf}
+\caption{Amazon Reviews / Transformer / 20,000 train. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-08-amazon_reviews-transformer}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 1e-04 & \(0.308\pm0.007\) & \(87.62\pm0.36\) & \(1.608\pm0.043\) \\
+Uniform & 5 & 0.15 & 3e-04 & \(0.284\pm0.002\) & \(88.54\pm0.06\) & \(1.769\pm0.106\) \\
+Step early & 5 & 0.15 & 3e-04 & \(0.299\pm0.013\) & \(88.15\pm0.29\) & \(1.791\pm0.104\) \\
+Big step & 5 & 0.05 & 3e-04 & \(0.298\pm0.003\) & \(88.19\pm0.25\) & \(1.889\pm0.021\) \\
+Linear decreasing & 5 & 0.10 & 1e-03 & \(0.320\pm0.012\) & \(86.78\pm0.64\) & \(1.997\pm0.101\) \\
+Linear increasing & 5 & 0.15 & 3e-04 & \(0.286\pm0.003\) & \(88.36\pm0.20\) & \(1.742\pm0.055\) \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(0.003\pm0.004\) (SEM).
+\clearpage
+\subsection{Amazon Reviews / MLP / 5,000 train}
+Depth 12, width 256; 5,000/5,000/10,000 training/validation/test examples; 100 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-09-amazon_reviews-mlp.pdf}
+\caption{Amazon Reviews / MLP / 5,000 train. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-09-amazon_reviews-mlp}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 1e-03 & \(0.595\pm0.024\) & \(73.42\pm1.23\) & \(4.882\pm0.317\) \\
+Uniform & 5 & 0.15 & 1e-03 & \(0.582\pm0.017\) & \(71.85\pm2.01\) & \(5.641\pm0.450\) \\
+Step early & 5 & 0.05 & 1e-03 & \(0.541\pm0.011\) & \(75.89\pm0.15\) & \(4.987\pm0.233\) \\
+Big step & 5 & 0.05 & 1e-03 & \(0.538\pm0.019\) & \(75.51\pm0.50\) & \(4.728\pm0.039\) \\
+Linear decreasing & 5 & 0.20 & 1e-03 & \(0.567\pm0.018\) & \(75.26\pm0.56\) & \(3.078\pm0.119\) \\
+Linear increasing & 5 & 0.10 & 3e-03 & \(0.633\pm0.025\) & \(71.63\pm1.01\) & \(22.338\pm3.966\) \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.044\pm0.028\) (SEM).
+\clearpage
+\subsection{Amazon Reviews / Transformer / 5,000 train}
+Depth 12, width 256; 5,000/5,000/10,000 training/validation/test examples; 100 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-10-amazon_reviews-transformer.pdf}
+\caption{Amazon Reviews / Transformer / 5,000 train. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-10-amazon_reviews-transformer}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 1e-04 & \(0.428\pm0.018\) & \(82.19\pm1.00\) & \(1.524\pm0.016\) \\
+Uniform & 5 & 0.05 & 3e-04 & \(0.405\pm0.015\) & \(84.55\pm0.11\) & \(1.653\pm0.032\) \\
+Step early & 5 & 0.05 & 1e-04 & \(0.426\pm0.006\) & \(82.04\pm0.47\) & \(1.583\pm0.024\) \\
+Big step & 5 & 0.10 & 1e-04 & \(0.448\pm0.019\) & \(83.46\pm0.49\) & \(1.597\pm0.040\) \\
+Linear decreasing & 5 & 0.05 & 5e-05 & \(0.461\pm0.010\) & \(80.79\pm0.88\) & \(1.588\pm0.024\) \\
+Linear increasing & 5 & 0.15 & 3e-04 & \(0.404\pm0.013\) & \(84.42\pm0.21\) & \(1.687\pm0.009\) \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.001\pm0.018\) (SEM).
+\clearpage
+\subsection{Tiny ImageNet / MLP / 80,000 train}
+Depth 12, width 256; 80,000/10,000/10,000 training/validation/test examples; 75 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-11-tiny_imagenet-mlp.pdf}
+\caption{Tiny ImageNet / MLP / 80,000 train. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-11-tiny_imagenet-mlp}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 3e-04 & \(4.561\pm0.004\) & \(7.64\pm0.15\) & \(28.876\pm0.230\) \\
+Uniform & 5 & 0.05 & 3e-04 & \(4.575\pm0.002\) & \(7.09\pm0.14\) & \(5.627\pm0.004\) \\
+Step early & 5 & 0.05 & 3e-04 & \(4.518\pm0.004\) & \(7.95\pm0.10\) & \(5.130\pm0.009\) \\
+Big step & 5 & 0.05 & 3e-04 & \(4.541\pm0.003\) & \(7.53\pm0.12\) & \(5.321\pm0.007\) \\
+Linear decreasing & 5 & 0.05 & 3e-04 & \(4.563\pm0.003\) & \(7.19\pm0.15\) & \(5.286\pm0.013\) \\
+Linear increasing & 5 & 0.05 & 3e-04 & \(4.608\pm0.005\) & \(6.75\pm0.12\) & \(7.764\pm0.023\) \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.058\pm0.005\) (SEM).
+\clearpage
+\subsection{Tiny ImageNet / Transformer / 80,000 train}
+Depth 12, width 256; 80,000/10,000/10,000 training/validation/test examples; 75 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-12-tiny_imagenet-transformer.pdf}
+\caption{Tiny ImageNet / Transformer / 80,000 train. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-12-tiny_imagenet-transformer}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 3e-04 & \(3.125\pm0.025\) & \(29.57\pm0.44\) & \(7.126\pm0.068\) \\
+Uniform & 5 & 0.20 & 3e-04 & \(3.035\pm0.014\) & \(31.49\pm0.17\) & \(6.104\pm0.043\) \\
+Step early & 5 & 0.15 & 3e-04 & \(3.053\pm0.015\) & \(31.22\pm0.21\) & \(6.164\pm0.025\) \\
+Big step & 5 & 0.10 & 3e-04 & \(3.026\pm0.013\) & \(31.35\pm0.38\) & \(6.296\pm0.034\) \\
+Linear decreasing & 5 & 0.15 & 3e-04 & \(3.004\pm0.016\) & \(31.78\pm0.23\) & \(6.002\pm0.042\) \\
+Linear increasing & 5 & 0.20 & 3e-04 & \(3.118\pm0.017\) & \(29.72\pm0.26\) & \(7.026\pm0.052\) \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.031\pm0.015\) (SEM).
+\clearpage
+\subsection{FI-2010 / Transformer / Linear follow-up}
+Depth 12, width 256; 40,000/10,000/20,000 training/validation/test examples; 50 epochs, batch size 128, weight decay \(1e-07\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-13-fi2010-transformer.pdf}
+\caption{FI-2010 / Transformer / Linear follow-up. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-13-fi2010-transformer}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 1e-03 & \(0.955\pm0.010\) & \(55.38\pm0.39\) & -- \\
+Linear decreasing & 5 & 0.10 & 1e-03 & \(0.930\pm0.006\) & \(57.72\pm0.83\) & -- \\
+\bottomrule\end{tabular}\end{center}
+\clearpage
+\subsection{Jannis / Transformer / Linear follow-up}
+Depth 12, width 256; 3,840/960/1,920 training/validation/test examples; 50 epochs, batch size 128, weight decay \(1e-07\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-14-openml_jannis-transformer.pdf}
+\caption{Jannis / Transformer / Linear follow-up. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-14-openml_jannis-transformer}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 1e-04 & \(0.986\pm0.002\) & \(59.07\pm0.47\) & -- \\
+Linear decreasing & 5 & 0.10 & 1e-04 & \(0.992\pm0.005\) & \(60.27\pm0.43\) & -- \\
+\bottomrule\end{tabular}\end{center}
+\clearpage
+\subsection{Jannis / Transformer / 100 epochs}
+Depth 12, width 256; 3,840/960/1,920 training/validation/test examples; 100 epochs, batch size 128, weight decay \(1e-07\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-15-openml_jannis-transformer.pdf}
+\caption{Jannis / Transformer / 100 epochs. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-15-openml_jannis-transformer}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 10 & 0.00 & 1e-04 & \(0.985\pm0.003\) & \(59.54\pm0.16\) & -- \\
+Uniform & 10 & 0.10 & 1e-04 & \(0.988\pm0.002\) & \(59.46\pm0.23\) & -- \\
+Step early & 10 & 0.10 & 1e-04 & \(0.990\pm0.004\) & \(59.85\pm0.21\) & -- \\
+Big step & 10 & 0.10 & 1e-04 & \(0.999\pm0.003\) & \(59.36\pm0.29\) & -- \\
+Linear decreasing & 10 & 0.10 & 1e-04 & \(0.988\pm0.003\) & \(59.75\pm0.13\) & -- \\
+Linear increasing & 10 & 0.10 & 1e-04 & \(0.992\pm0.003\) & \(59.40\pm0.25\) & -- \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(0.000\pm0.004\) (SEM).
+\clearpage
+\subsection{Tiny ImageNet / MLP / Zero weight decay}
+Depth 12, width 256; 20,000/5,000/10,000 training/validation/test examples; 75 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-16-tiny_imagenet-mlp.pdf}
+\caption{Tiny ImageNet / MLP / Zero weight decay. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-16-tiny_imagenet-mlp}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 1e-03 & \(4.856\pm0.005\) & \(3.88\pm0.05\) & -- \\
+Uniform & 5 & 0.05 & 1e-03 & \(4.868\pm0.006\) & \(3.45\pm0.06\) & -- \\
+Step early & 5 & 0.05 & 3e-04 & \(4.774\pm0.006\) & \(4.84\pm0.04\) & -- \\
+Big step & 5 & 0.05 & 3e-04 & \(4.787\pm0.003\) & \(4.61\pm0.10\) & -- \\
+Linear decreasing & 5 & 0.05 & 3e-04 & \(4.823\pm0.004\) & \(4.38\pm0.10\) & -- \\
+Linear increasing & 5 & 0.05 & 1e-03 & \(4.898\pm0.007\) & \(3.36\pm0.09\) & -- \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.094\pm0.011\) (SEM).
+\clearpage
+\subsection{Tiny ImageNet / Transformer / Zero weight decay}
+Depth 12, width 256; 20,000/5,000/10,000 training/validation/test examples; 75 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-17-tiny_imagenet-transformer.pdf}
+\caption{Tiny ImageNet / Transformer / Zero weight decay. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-17-tiny_imagenet-transformer}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 3e-04 & \(3.981\pm0.012\) & \(14.92\pm0.21\) & -- \\
+Uniform & 5 & 0.10 & 3e-04 & \(3.976\pm0.007\) & \(14.63\pm0.17\) & -- \\
+Step early & 5 & 0.15 & 1e-04 & \(3.890\pm0.008\) & \(16.26\pm0.10\) & -- \\
+Big step & 5 & 0.15 & 3e-04 & \(3.960\pm0.012\) & \(15.45\pm0.29\) & -- \\
+Linear decreasing & 5 & 0.20 & 3e-04 & \(3.980\pm0.011\) & \(14.71\pm0.22\) & -- \\
+Linear increasing & 5 & 0.05 & 3e-04 & \(3.981\pm0.017\) & \(14.73\pm0.30\) & -- \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.086\pm0.013\) (SEM).
+\clearpage
+\subsection{FI-2010 / MLP / Zero weight decay}
+Depth 12, width 256; 40,000/10,000/20,000 training/validation/test examples; 50 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-18-fi2010-mlp.pdf}
+\caption{FI-2010 / MLP / Zero weight decay. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-18-fi2010-mlp}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 3e-03 & \(1.118\pm0.017\) & \(42.19\pm2.20\) & -- \\
+Uniform & 5 & 0.05 & 1e-04 & \(1.093\pm0.004\) & \(47.70\pm0.37\) & -- \\
+Step early & 5 & 0.10 & 3e-05 & \(1.061\pm0.004\) & \(48.19\pm0.33\) & -- \\
+Big step & 5 & 0.10 & 3e-05 & \(1.054\pm0.004\) & \(48.37\pm0.39\) & -- \\
+Linear decreasing & 5 & 0.05 & 3e-05 & \(1.074\pm0.008\) & \(47.48\pm0.27\) & -- \\
+Linear increasing & 5 & 0.15 & 1e-03 & \(1.115\pm0.011\) & \(37.62\pm0.39\) & -- \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.039\pm0.005\) (SEM).
+\clearpage
+\subsection{FI-2010 / Transformer / Zero weight decay}
+Depth 12, width 256; 40,000/10,000/20,000 training/validation/test examples; 50 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-19-fi2010-transformer.pdf}
+\caption{FI-2010 / Transformer / Zero weight decay. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-19-fi2010-transformer}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 1e-03 & \(0.955\pm0.010\) & \(55.38\pm0.39\) & -- \\
+Uniform & 5 & 0.05 & 1e-03 & \(0.942\pm0.008\) & \(56.40\pm0.66\) & -- \\
+Step early & 5 & 0.10 & 1e-03 & \(0.934\pm0.009\) & \(59.04\pm0.45\) & -- \\
+Big step & 5 & 0.15 & 1e-03 & \(0.917\pm0.011\) & \(58.31\pm0.50\) & -- \\
+Linear decreasing & 5 & 0.10 & 1e-03 & \(0.944\pm0.014\) & \(57.22\pm1.09\) & -- \\
+Linear increasing & 5 & 0.05 & 1e-03 & \(0.909\pm0.004\) & \(58.66\pm0.34\) & -- \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.032\pm0.006\) (SEM).
+\clearpage
+\subsection{Jannis / MLP / Zero weight decay}
+Depth 12, width 256; 3,840/960/1,920 training/validation/test examples; 100 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-20-openml_jannis-mlp.pdf}
+\caption{Jannis / MLP / Zero weight decay. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-20-openml_jannis-mlp}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 3e-03 & \(1.123\pm0.006\) & \(51.56\pm0.38\) & -- \\
+Uniform & 5 & 0.10 & 3e-04 & \(1.123\pm0.007\) & \(52.96\pm0.20\) & -- \\
+Step early & 5 & 0.05 & 3e-04 & \(1.091\pm0.004\) & \(54.25\pm0.41\) & -- \\
+Big step & 5 & 0.10 & 3e-03 & \(1.087\pm0.003\) & \(55.00\pm0.43\) & -- \\
+Linear decreasing & 5 & 0.05 & 3e-04 & \(1.110\pm0.004\) & \(53.18\pm0.52\) & -- \\
+Linear increasing & 5 & 0.05 & 3e-03 & \(1.140\pm0.008\) & \(51.77\pm0.71\) & -- \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.036\pm0.007\) (SEM).
+\clearpage
+\subsection{Jannis / Transformer / Zero weight decay}
+Depth 12, width 256; 3,840/960/1,920 training/validation/test examples; 100 epochs, batch size 128, weight decay \(0\). The recorded split is held fixed across profiles.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/experiments/benchmarks/benchmark-21-openml_jannis-transformer.pdf}
+\caption{Jannis / Transformer / Zero weight decay. Full recorded learning curves; bands show SEM across the available seeds for each profile. Sample counts and tuned probabilities are given below.}
+\label{fig:benchmark-21-openml_jannis-transformer}
+\end{figure}
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Profile & $n$ & $\bar p$ & Learning rate & Test CE & Test acc. (\%) & Final test CE \\
+\midrule
+No dropout (tuned) & 5 & 0.00 & 1e-04 & \(0.985\pm0.002\) & \(59.50\pm0.10\) & -- \\
+Uniform & 5 & 0.10 & 1e-04 & \(0.993\pm0.004\) & \(58.98\pm0.19\) & -- \\
+Step early & 5 & 0.05 & 1e-04 & \(0.988\pm0.001\) & \(59.22\pm0.21\) & -- \\
+Big step & 5 & 0.05 & 1e-04 & \(0.992\pm0.003\) & \(59.24\pm0.57\) & -- \\
+Linear decreasing & 5 & 0.10 & 1e-04 & \(0.994\pm0.003\) & \(58.90\pm0.32\) & -- \\
+Linear increasing & 5 & 0.10 & 1e-04 & \(0.988\pm0.003\) & \(60.28\pm0.26\) & -- \\
+\bottomrule\end{tabular}\end{center}
+For the best observed nonuniform profile, the paired test-CE difference (profile minus uniform) is \(-0.005\pm0.004\) (SEM).
+\clearpage
+\subsection{CIFAR-10 profile-geometry pilot}
+The validation-only geometry pilot contains 30 runs: ten profiles at mean probability $\bar p=0.10$, with three seeds per profile, six-layer width-256 ReLU MLPs, 4,000 training examples, 1,000 validation examples, and 75 epochs. It compares profile shape and exact early/late reversals. Test data remain sealed, so this pilot contributes no test-loss winner to the main tables.
+\begin{figure}[ht]\centering
+\includegraphics[width=0.94\textwidth]{figures/experiments/benchmarks/profile-geometry-pilot.pdf}
+\caption{Profile geometry at fixed mean dropout. Training and validation curves use the original paper style and show mean $\pm$ SEM over three seeds.}
+\label{fig:profile-geometry-pilot}\end{figure}
+\begin{center}\small\begin{tabular}{@{}lrr@{}}\toprule
+Profile & Final validation CE & Final validation accuracy (\%) \\
+\midrule
+No dropout & \(3.872\pm0.053\) & \(38.10\pm0.40\) \\
+Uniform & \(2.303\pm0.019\) & \(41.17\pm0.55\) \\
+Step early & \(1.864\pm0.009\) & \(42.17\pm0.43\) \\
+Linear decreasing & \(1.933\pm0.019\) & \(42.97\pm0.15\) \\
+Linear increasing & \(3.025\pm0.045\) & \(39.30\pm0.40\) \\
+Step late & \(3.688\pm0.097\) & \(39.27\pm0.30\) \\
+Quadratic early & \(1.852\pm0.001\) & \(43.73\pm0.38\) \\
+Quadratic late & \(3.382\pm0.042\) & \(39.43\pm0.80\) \\
+Quartic early & \(1.831\pm0.016\) & \(43.53\pm0.41\) \\
+Quartic late & \(3.534\pm0.048\) & \(39.00\pm0.50\) \\
+\bottomrule\end{tabular}\end{center}
+A complete width-transfer result set was not available in the recovered records. The retained protocol defines those future comparisons, but the geometry pilot alone does not establish successful $\mu$P transfer.

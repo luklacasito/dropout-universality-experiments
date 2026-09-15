@@ -1,0 +1,80 @@
+[
+  {
+    "dataset": "CIFAR-10",
+    "model": "MLP schedules",
+    "winner": "Step early",
+    "n": 25,
+    "uniform_loss": 2.223257144355774,
+    "uniform_loss_sem": 0.008644694117677277,
+    "winner_loss": 1.8260836622238161,
+    "winner_loss_sem": 0.004810610817581538,
+    "uniform_accuracy": 41.84,
+    "winner_accuracy": 42.668,
+    "reduction_percent": 17.864486937117
+  },
+  {
+    "dataset": "CIFAR-10",
+    "model": "MLP budget controls",
+    "winner": "Big step",
+    "n": 25,
+    "uniform_loss": 2.223257144355774,
+    "uniform_loss_sem": 0.008644694117677277,
+    "winner_loss": 1.7205689470291137,
+    "winner_loss_sem": 0.0023912603825423607,
+    "uniform_accuracy": 41.84,
+    "winner_accuracy": 42.9168,
+    "reduction_percent": 22.61043886006819
+  },
+  {
+    "dataset": "CIFAR-10",
+    "model": "ReLU p=0.1",
+    "winner": "Big step",
+    "n": 3,
+    "uniform_loss": 3.1315033133824666,
+    "uniform_loss_sem": 0.02159241252340615,
+    "winner_loss": 2.021965964635213,
+    "winner_loss_sem": 0.023031244460627442,
+    "uniform_accuracy": 40.453333333333326,
+    "winner_accuracy": 42.49333333333333,
+    "reduction_percent": 35.43146015543558
+  },
+  {
+    "dataset": "CIFAR-10",
+    "model": "GELU p=0.1",
+    "winner": "Big step",
+    "n": 10,
+    "uniform_loss": 2.605479051530361,
+    "uniform_loss_sem": 0.015104470401019018,
+    "winner_loss": 1.8292560832500455,
+    "winner_loss_sem": 0.006828629664113353,
+    "uniform_accuracy": 41.444,
+    "winner_accuracy": 42.062,
+    "reduction_percent": 29.79194815726464
+  },
+  {
+    "dataset": "CIFAR-100",
+    "model": "ViT",
+    "winner": "Linear decreasing",
+    "n": 10,
+    "uniform_loss": 3.727876456975937,
+    "uniform_loss_sem": 0.01574390216002263,
+    "winner_loss": 3.5730307030677793,
+    "winner_loss_sem": 0.013924746333154487,
+    "uniform_accuracy": 48.614,
+    "winner_accuracy": 49.275,
+    "reduction_percent": 4.153725470660282
+  },
+  {
+    "dataset": "CIFAR-10",
+    "model": "ViT both-block ablation",
+    "winner": "Step early",
+    "n": 5,
+    "uniform_loss": 1.6553538608551026,
+    "uniform_loss_sem": 0.011615792560346411,
+    "winner_loss": 1.550719404220581,
+    "winner_loss_sem": 0.00877509927974218,
+    "uniform_accuracy": 74.77799999999999,
+    "winner_accuracy": 75.3,
+    "reduction_percent": 6.320972156398684
+  }
+]

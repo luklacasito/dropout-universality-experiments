@@ -1,0 +1,40 @@
+\begin{table*}[t]
+\centering
+\caption{Cross-dataset confirmation results. CE is test cross-entropy at each run's minimum-validation-loss checkpoint; uncertainties are SEM across seeds. The best nonuniform profile minimizes observed mean test CE among profiles with the full paired seed set, so these are descriptive best-observed comparisons, not independent tests of a prespecified winner. Reduction is relative to uniform; accuracies are percentages. A dagger marks incomplete candidate coverage. Missing baselines are shown explicitly.}
+\label{tab:benchmark_results}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llrlrrrr@{}}
+\toprule
+Dataset / setting & Model & Seeds & Best nonuniform & Uniform CE & Best CE & Reduction & Acc. U / best \\
+\midrule
+\multicolumn{8}{l}{\textit{Multi-dataset benchmark}} \\
+Amazon Reviews & MLP & 5 & Step early & \(0.428\pm0.008\) & \(0.406\pm0.003\) & +5.12\% & 81.12 / 82.34 \\
+Amazon Reviews & Transformer & 5 & Linear increasing & \(0.293\pm0.004\) & \(0.283\pm0.002\) & +3.40\% & 88.48 / 88.38 \\
+Speech Commands & MLP & 5 & Step early & \(1.073\pm0.006\) & \(0.937\pm0.003\) & +12.71\% & 72.23 / 74.06 \\
+Speech Commands & Transformer & 5 & Big step & \(0.743\pm0.017\) & \(0.707\pm0.036\) & +4.91\% & 79.54 / 81.07 \\
+Tiny ImageNet & MLP & 5 & Step early & \(4.868\pm0.006\) & \(4.774\pm0.006\) & +1.94\% & 3.45 / 4.84 \\
+Tiny ImageNet & Transformer & 5 & Step early & \(3.976\pm0.007\) & \(3.890\pm0.008\) & +2.17\% & 14.63 / 16.26 \\
+FI-2010 & MLP & 5 & Big step & \(1.093\pm0.004\) & \(1.054\pm0.004\) & +3.57\% & 47.70 / 48.37 \\
+FI-2010 & Transformer & 5 & Linear increasing & \(0.942\pm0.008\) & \(0.909\pm0.004\) & +3.43\% & 56.40 / 58.66 \\
+Jannis & MLP & 5 & Big step & \(1.123\pm0.007\) & \(1.087\pm0.003\) & +3.25\% & 52.96 / 55.00 \\
+Jannis & Transformer & 5 & Step early & \(0.993\pm0.004\) & \(0.988\pm0.001\) & +0.50\% & 58.98 / 59.22 \\
+\addlinespace[3pt]
+\multicolumn{8}{l}{\textit{Data-regime comparisons}} \\
+Amazon Reviews 2,000 train & MLP & 5 & Big step & \(0.672\pm0.011\) & \(0.643\pm0.008\) & +4.26\% & 59.26 / 67.12 \\
+Amazon Reviews 2,000 train & Transformer & 5 & Step early & \(0.494\pm0.023\) & \(0.520\pm0.007\) & -5.34\% & 78.51 / 79.35 \\
+Amazon Reviews 20,000 train$^{\dagger}$ & MLP & 5 & Step early & \(0.422\pm0.005\) & \(0.407\pm0.004\) & +3.58\% & 81.61 / 81.94 \\
+Amazon Reviews 20,000 train & Transformer & 5 & Linear increasing & \(0.284\pm0.002\) & \(0.286\pm0.003\) & -0.97\% & 88.54 / 88.36 \\
+Amazon Reviews 5,000 train & MLP & 5 & Big step & \(0.582\pm0.017\) & \(0.538\pm0.019\) & +7.54\% & 71.85 / 75.51 \\
+Amazon Reviews 5,000 train & Transformer & 5 & Linear increasing & \(0.405\pm0.015\) & \(0.404\pm0.013\) & +0.15\% & 84.55 / 84.42 \\
+Tiny ImageNet 80,000 train & MLP & 5 & Step early & \(4.575\pm0.002\) & \(4.518\pm0.004\) & +1.26\% & 7.09 / 7.95 \\
+Tiny ImageNet 80,000 train & Transformer & 5 & Linear decreasing & \(3.035\pm0.014\) & \(3.004\pm0.016\) & +1.01\% & 31.49 / 31.78 \\
+\addlinespace[3pt]
+\multicolumn{8}{l}{\textit{Architecture and duration follow-ups}} \\
+FI-2010 (linear) & Transformer & 5 & Linear decreasing & -- & \(0.930\pm0.006\) & -- & -- / 57.72 \\
+Jannis (linear) & Transformer & 5 & Linear decreasing & -- & \(0.992\pm0.005\) & -- & -- / 60.27 \\
+Jannis (100 ep.) & Transformer & 10 & Linear decreasing & \(0.988\pm0.002\) & \(0.988\pm0.003\) & -0.05\% & 59.46 / 59.75 \\
+\addlinespace[3pt]
+\bottomrule
+\end{tabular}
+\end{table*}

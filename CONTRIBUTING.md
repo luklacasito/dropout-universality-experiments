@@ -9,28 +9,24 @@ python -m pip install -e . -r requirements-dev.txt
 make check
 ```
 
-`make check` runs Ruff, checks shell/Slurm syntax, and runs the package and RNN
-tests. Benchmark dataset extras are only needed when preparing real datasets.
+`make check` runs Ruff, checks shell/Slurm syntax, and runs the package tests. Benchmark dataset extras are only needed when preparing real datasets.
 
 Useful individual commands:
 
 ```bash
 make format                         # Sort imports and format maintained Python code
 make lint                           # Check without editing
-make test                           # Package tests plus standalone RNN suites
+make test                           # Package and experiment tests
 python -m pytest tests/benchmark -q  # Just the benchmark package tests
 make check-shell
 ```
 
 Override the interpreter with `make check PYTHON=/path/to/python` if needed.
 Without Make, run `python -m ruff check .`, `python -m ruff format --check .`,
-`python -m pytest`, and the three `python -m unittest discover -s experiments/NAME -v`
-commands for `rnn_pilot`, `rnn_ptb`, and `rnn_ptb_linear` separately. Their generic
-`run.py` imports require separate processes.
+and `python -m pytest`.
 
-Ruff formats maintained `.py` files; it excludes the three frozen RNN directories
-and leaves notebook outputs alone. The existing optional pre-commit hook strips
-notebook output: run `pre-commit install` if you want it enabled locally.
+Ruff formats maintained `.py` files and leaves notebook outputs alone. The
+optional pre-commit hook strips notebook output; enable it with `pre-commit install`.
 
 ## Optional GitHub Actions checks
 
@@ -70,8 +66,8 @@ whether the protocol changed first.
 
 For shared training or analysis refactors, compare a before/after checkout using
 [the differential verification commands](docs/refactor-verification.md).
-The RNN sources are separately frozen; extend them under a new, explicitly
-recorded source identity instead of editing an active run's implementation.
+Archived experiments are outside the working repository; restore their original
+snapshot separately if historical reproduction is needed.
 
 ## Pull requests
 

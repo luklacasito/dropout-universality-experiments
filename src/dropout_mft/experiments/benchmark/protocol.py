@@ -5,7 +5,7 @@ CIFAR-10/100.  This module runs the same comparison across five tasks spanning
 finance, vision, text, audio, and tabular data, for both an MLP and a
 transformer.
 
-Like :mod:`dropout_mft.experiments.legacy.protocol`, this is a separate
+This is a separate
 content-addressed cohort rather than an extension of
 :class:`dropout_mft.experiments.scale_transfer.protocol.TrialSpec`.
 Adding fields to that dataclass would change the content hashes of already

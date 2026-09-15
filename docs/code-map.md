@@ -57,13 +57,10 @@ Share code when the behavior really is the same across studies.
 
 ## Why some code stays separate
 
-- **Legacy training** preserves the historical initialization and random-number
-  order. A similar-looking loop can describe a different experiment.
 - **Scale transfer** has its own trial definition and phase-specific selection
   rules. Its analysis includes standard and μP parameterizations.
-- **Optiver** has its own feature pipeline and time-based splits.
-- **RNN pilots** are standalone source snapshots with their own test suites and
-  source hashes. See the [RNN guide](rnn-studies.md).
+- **Original paper reproductions** keep the original results and notebook
+  conventions so their figures can still be regenerated.
 - **Profile sampling conventions** differ: endpoint samples and cell-center
   samples can have the same mean but different probabilities at each layer.
   Their distinction is part of the protocol.
