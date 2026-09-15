@@ -15,7 +15,6 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
-
 CifarDatasetName = Literal["cifar10", "cifar100"]
 BenchmarkDatasetName = Literal[
     "fi2010",
@@ -91,6 +90,25 @@ class TrainingConfig:
             not math.isfinite(self.gradient_clip_norm) or self.gradient_clip_norm <= 0
         ):
             raise ValueError("gradient_clip_norm must be finite and positive")
+
+
+def training_config_from_trial(
+    spec, randomization: dict, *, device="auto", restore_best_validation=False
+) -> TrainingConfig:
+    """Translate common trial fields without changing the study's test policy."""
+    return TrainingConfig(
+        epochs=spec.epochs,
+        batch_size=spec.batch_size,
+        learning_rate=spec.learning_rate,
+        lr_floor_ratio=spec.lr_floor_ratio,
+        weight_decay=spec.weight_decay,
+        gradient_clip_norm=spec.gradient_clip_norm,
+        seed=randomization["minibatch_seed"],
+        stochastic_seed=randomization["dropout_seed"],
+        evaluate_test=spec.evaluate_test,
+        restore_best_validation=restore_best_validation,
+        device=device,
+    )
 
 
 def seed_everything(seed: int) -> None:

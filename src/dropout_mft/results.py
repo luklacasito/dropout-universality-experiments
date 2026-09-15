@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import json
 import math
+import os
 from pathlib import Path
 from typing import Any
 
@@ -58,8 +59,13 @@ def save_npz_result(path: str | Path, data: Any) -> None:
     """Store nested result dictionaries as JSON metadata plus NPZ arrays."""
 
     arrays: dict[str, np.ndarray] = {}
-    metadata = json.dumps(_pack_for_npz(data, arrays), separators=(",", ":"), allow_nan=False)
-    payload = {"__metadata__": np.frombuffer(metadata.encode("utf-8"), dtype=np.uint8), **arrays}
+    metadata = json.dumps(
+        _pack_for_npz(data, arrays), separators=(",", ":"), allow_nan=False
+    )
+    payload = {
+        "__metadata__": np.frombuffer(metadata.encode("utf-8"), dtype=np.uint8),
+        **arrays,
+    }
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(path, **payload)
@@ -72,6 +78,60 @@ def load_npz_result(path: str | Path) -> Any:
         metadata = bytes(bundle["__metadata__"]).decode("utf-8")
         arrays = {key: bundle[key] for key in bundle.files if key != "__metadata__"}
         return _unpack_from_npz(json.loads(metadata), arrays)
+
+
+def save_npz_result_atomic(path: str | Path, data: Any) -> None:
+    """Replace a result only after its complete NPZ has been written."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.stem}.{os.getpid()}.tmp.npz")
+    try:
+        save_npz_result(temporary, data)
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def load_matching_trial(
+    path,
+    spec,
+    bundle,
+    randomization,
+    *,
+    schema_version,
+    source_hash,
+    force=False,
+    checkpoint_path=None,
+):
+    """Resume only an exact completed trial, including its optional checkpoint."""
+    from dropout_mft.provenance import sha256_file
+
+    path = Path(path)
+    if force or not path.exists():
+        return None
+    result = load_npz_result(path)
+    trial = result.get("trial", {})
+    valid = (
+        result.get("schema_version") == schema_version
+        and trial.get("trial_id") == spec.trial_id
+        and trial.get("config_hash") == spec.config_hash
+        and trial.get("status") == "complete"
+        and result.get("data", {}).get("split_hash") == bundle.split_hash
+        and result.get("randomization") == randomization
+        and result.get("provenance", {}).get("source_provenance_sha256") == source_hash
+    )
+    if valid and checkpoint_path is not None:
+        checkpoint_path = Path(checkpoint_path)
+        checkpoint = result.get("checkpoint", {})
+        valid = (
+            checkpoint.get("saved") is True
+            and checkpoint.get("format") == "torch_state_dict_v1"
+            and checkpoint_path.is_file()
+            and checkpoint.get("sha256") == sha256_file(checkpoint_path)
+        )
+    if not valid:
+        raise ValueError(f"Existing trial is corrupt or mismatched: {path}")
+    return result
 
 
 def parse_tuple_key(key: str) -> tuple[Any, ...]:

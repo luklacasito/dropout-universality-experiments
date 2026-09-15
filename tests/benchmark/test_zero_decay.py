@@ -29,9 +29,7 @@ def _lr_selection() -> dict[str, dict]:
     return {
         profile_id: {
             "learning_rate": 1e-4,
-            "mean_dropout": 0.0
-            if profile_id == TUNED_CONTROL_PROFILE_ID
-            else 0.10,
+            "mean_dropout": 0.0 if profile_id == TUNED_CONTROL_PROFILE_ID else 0.10,
         }
         for profile_id in ZERO_DECAY_PROFILE_IDS
     }
@@ -57,7 +55,9 @@ def test_complete_cohort_has_480_trials_and_exactly_zero_weight_decay():
             specs.extend(zero_decay_lr_search_specs(dataset, model_kind))
             specs.extend(
                 zero_decay_budget_search_specs(
-                    dataset, model_kind, {profile: 1e-4 for profile in ZERO_DECAY_PROFILE_IDS}
+                    dataset,
+                    model_kind,
+                    {profile: 1e-4 for profile in ZERO_DECAY_PROFILE_IDS},
                 )
             )
             specs.extend(
@@ -135,9 +135,7 @@ def test_confirmation_uses_fresh_seeds_and_independently_tuned_no_dropout():
     assert len(specs) == 30
     assert {spec.seed for spec in specs} == set(CONFIRM_SEEDS)
     assert all(spec.evaluate_test for spec in specs)
-    controls = [
-        spec for spec in specs if spec.profile_id == TUNED_CONTROL_PROFILE_ID
-    ]
+    controls = [spec for spec in specs if spec.profile_id == TUNED_CONTROL_PROFILE_ID]
     assert len(controls) == len(CONFIRM_SEEDS)
     assert all(spec.mean_dropout == 0.0 for spec in controls)
     assert all(spec.learning_rate == 3e-4 for spec in controls)

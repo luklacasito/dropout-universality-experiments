@@ -20,6 +20,7 @@ import numpy as np
 
 if TYPE_CHECKING:
     from dropout_mft.experiments.benchmark.protocol import BenchmarkTrialSpec
+
     from .training import DatasetBundle
 
 

@@ -32,7 +32,7 @@ if [[ ! -f "${DATA_ROOT}/benchmarks/openml_jannis.npz" ]]; then
 fi
 
 mkdir -p "${RUN_DIR}/logs"
-python experiments/benchmark/run_jannis_100.py plan --run-dir "${RUN_DIR}"
+python -m dropout_mft.experiments.benchmark jannis_100 plan --run-dir "${RUN_DIR}"
 
 common="PROJECT_DIR=${PROJECT_DIR},RUN_DIR=${RUN_DIR},VENV_DIR=${VENV_DIR}"
 common="${common},DATA_ROOT=${DATA_ROOT},STAGE=confirm,NUM_SHARDS=${NUM_SHARDS}"
@@ -46,7 +46,7 @@ confirm_job=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
 echo "jannis 100epoch confirm ${confirm_job}"
 
 aggregate_wrap="source ${VENV_DIR}/bin/activate && cd ${PROJECT_DIR} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run_jannis_100.py aggregate \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark jannis_100 aggregate \
 --run-dir ${RUN_DIR}"
 
 aggregate_job=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
@@ -59,7 +59,7 @@ aggregate_job=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
 echo "aggregate               ${aggregate_job}"
 
 echo
-python experiments/benchmark/run_jannis_100.py cost
-echo "Track: python experiments/benchmark/run.py status --run-dir ${RUN_DIR}"
+python -m dropout_mft.experiments.benchmark jannis_100 cost
+echo "Track: python -m dropout_mft.experiments.benchmark benchmark status --run-dir ${RUN_DIR}"
 echo "Checkpoints: ${RUN_DIR}/checkpoints/openml_jannis/transformer/confirm"
 echo "W&B spool: ${RUN_DIR}/wandb"

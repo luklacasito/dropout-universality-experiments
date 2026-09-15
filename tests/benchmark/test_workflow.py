@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from dropout_mft.experiments.benchmark import workflow
 from dropout_mft.experiments.benchmark.workflow import (
     load_selection,
     paired_percentile_interval,
@@ -19,6 +20,24 @@ def test_shared_selection_paths_and_atomic_json_round_trip(tmp_path):
     path = selection_path(tmp_path, "lr_search")
     assert write_json_atomic(path, expected) == path
     assert load_selection(tmp_path, "lr_search") == expected
+
+
+def test_failed_json_replace_preserves_selection_and_removes_temporary_file(
+    tmp_path, monkeypatch
+):
+    path = selection_path(tmp_path, "lr_search")
+    original = {"selected": "original"}
+    write_json_atomic(path, original)
+
+    def fail_replace(*_args):
+        raise OSError("simulated filesystem failure")
+
+    monkeypatch.setattr(workflow.os, "replace", fail_replace)
+    with pytest.raises(OSError, match="simulated filesystem failure"):
+        write_json_atomic(path, {"selected": "replacement"})
+
+    assert load_selection(tmp_path, "lr_search") == original
+    assert list(path.parent.iterdir()) == [path]
 
 
 def test_shared_manifest_writer_refuses_replacement(tmp_path):

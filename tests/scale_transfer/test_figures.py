@@ -11,7 +11,6 @@ import pytest
 
 from dropout_mft.results import save_npz_result
 
-
 SCRIPT = (
     Path(__file__).resolve().parents[2]
     / "experiments"

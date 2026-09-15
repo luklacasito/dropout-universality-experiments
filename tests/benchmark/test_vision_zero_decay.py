@@ -12,17 +12,15 @@ from dropout_mft.experiments.benchmark.protocol import (
     TUNED_CONTROL_PROFILE_ID,
     benchmark_profile_layers,
 )
-from dropout_mft.experiments.benchmark.vision_zero_decay import (
+from dropout_mft.experiments.benchmark.zero_decay import (
     VISION_ZERO_DECAY_COHORT_ID,
     VISION_ZERO_DECAY_MODEL_KINDS,
+    ZERO_DECAY_DROPOUT_PROFILE_IDS,
+    ZERO_DECAY_PROFILE_IDS,
     vision_zero_decay_budget_search_specs,
     vision_zero_decay_confirm_specs,
     vision_zero_decay_lr_search_specs,
     vision_zero_decay_trial_count,
-)
-from dropout_mft.experiments.benchmark.zero_decay import (
-    ZERO_DECAY_DROPOUT_PROFILE_IDS,
-    ZERO_DECAY_PROFILE_IDS,
 )
 
 
@@ -83,9 +81,7 @@ def test_vision_budget_search_uses_four_rates_and_three_validation_seeds():
 
 
 def test_vision_confirmation_has_six_arms_and_fresh_test_seeds():
-    specs = vision_zero_decay_confirm_specs(
-        "mlp", _budget_selection(), _lr_selection()
-    )
+    specs = vision_zero_decay_confirm_specs("mlp", _budget_selection(), _lr_selection())
     assert len(specs) == 30
     assert {spec.profile_id for spec in specs} == set(ZERO_DECAY_PROFILE_IDS)
     assert {spec.seed for spec in specs} == set(CONFIRM_SEEDS)

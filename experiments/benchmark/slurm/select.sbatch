@@ -23,6 +23,6 @@ cd "${PROJECT_DIR}"
 export PYTHONPATH="${PROJECT_DIR}/src${PYTHONPATH:+:${PYTHONPATH}}"
 export PYTHONUNBUFFERED=1
 
-python experiments/benchmark/run.py status --run-dir "${RUN_DIR}"
-python experiments/benchmark/run.py select --run-dir "${RUN_DIR}" --stage "${STAGE}"
-python experiments/benchmark/run.py plan --run-dir "${RUN_DIR}" --stage "${NEXT_STAGE}"
+python -m dropout_mft.experiments.benchmark benchmark status --run-dir "${RUN_DIR}"
+python -m dropout_mft.experiments.benchmark benchmark select --run-dir "${RUN_DIR}" --stage "${STAGE}"
+python -m dropout_mft.experiments.benchmark benchmark plan --run-dir "${RUN_DIR}" --stage "${NEXT_STAGE}"

@@ -14,11 +14,11 @@ from pathlib import Path
 
 import numpy as np
 import torch
-import dropout_mft.experiments.legacy.protocol as legacy_module
 
+import dropout_mft.experiments.legacy.protocol as legacy_module
 from dropout_mft.experiments.legacy.protocol import (
-    LEGACY_DATA_PROTOCOL,
     ALL_LEGACY_PROFILE_IDS,
+    LEGACY_DATA_PROTOCOL,
     LEGACY_PHASE,
     LEGACY_PROFILE_IDS,
     LEGACY_SCHEMA_VERSION,
@@ -42,7 +42,6 @@ from dropout_mft.provenance import (
     sha256_file,
 )
 from dropout_mft.results import load_npz_result
-
 
 SAVED_ORIGINAL_SHA256 = (
     "0c347bca4756e65f7409388daf43519a02d58807f3b44dae0af62ba6f48496a7"
@@ -383,8 +382,7 @@ def command_run(args) -> None:
     for index, spec in enumerate(specs, start=1):
         output = output_dir / f"{spec.trial_id}.npz"
         print(
-            f"[{index}/{len(specs)}] {spec.trial_id} {spec.profile_id} "
-            f"seed={spec.seed}"
+            f"[{index}/{len(specs)}] {spec.trial_id} {spec.profile_id} seed={spec.seed}"
         )
         output.parent.mkdir(parents=True, exist_ok=True)
         trial_lock = output.with_suffix(".lock")

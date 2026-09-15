@@ -15,7 +15,11 @@ def mean_sem(values, axis: int = 0) -> tuple[np.ndarray, np.ndarray]:
     arr = as_array(values)
     mean = np.nanmean(arr, axis=axis)
     n = arr.shape[axis] if arr.ndim > axis else 1
-    sem = np.nanstd(arr, axis=axis, ddof=1) / np.sqrt(max(n, 1)) if n > 1 else np.zeros_like(mean)
+    sem = (
+        np.nanstd(arr, axis=axis, ddof=1) / np.sqrt(max(n, 1))
+        if n > 1
+        else np.zeros_like(mean)
+    )
     return mean, sem
 
 
@@ -29,7 +33,9 @@ def final_per_seed(entry: dict, metric: str = "test_acc") -> np.ndarray:
     return arr[:, -1]
 
 
-def curve_with_band(ax, curves, *, color: str, label: str, x=None, alpha: float = 0.16, **kwargs):
+def curve_with_band(
+    ax, curves, *, color: str, label: str, x=None, alpha: float = 0.16, **kwargs
+):
     arr = as_array(curves)
     if x is None:
         x = np.arange(arr.shape[1])

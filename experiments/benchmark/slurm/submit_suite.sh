@@ -81,7 +81,7 @@ submit_select() {
 }
 
 # The first manifest needs no prior selection, so plan it here on the login node.
-"${VENV_DIR}/bin/python" experiments/benchmark/run.py plan \
+"${VENV_DIR}/bin/python" -m dropout_mft.experiments.benchmark benchmark plan \
   --run-dir "${RUN_DIR}" --stage lr_search
 
 lr_job=$(submit_array lr_search "${LR_SHARDS}" "")
@@ -106,11 +106,11 @@ aggregate_job=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
   --nodes=1 --ntasks=1 \
   --time=00:30:00 --output="${RUN_DIR}/logs/slurm-%x-%j.out" \
   --wrap="source ${VENV_DIR}/bin/activate && cd ${PROJECT_DIR} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run.py aggregate \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark benchmark aggregate \
 --run-dir ${RUN_DIR}")
 echo "aggregate             ${aggregate_job}"
 
 echo
 echo "Track with: squeue -u \$USER"
-echo "Progress:   python experiments/benchmark/run.py status --run-dir ${RUN_DIR}"
+echo "Progress:   python -m dropout_mft.experiments.benchmark benchmark status --run-dir ${RUN_DIR}"
 echo "W&B spool:  ${RUN_DIR}/wandb (sync after the arrays finish)"

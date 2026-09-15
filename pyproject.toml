@@ -44,3 +44,13 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+include = ["*.py", "pyproject.toml"]
+# These standalone studies identify runs by their exact source bytes.
+extend-exclude = ["experiments/rnn_pilot", "experiments/rnn_ptb", "experiments/rnn_ptb_linear"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

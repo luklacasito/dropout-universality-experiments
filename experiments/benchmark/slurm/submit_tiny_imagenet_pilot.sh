@@ -29,7 +29,7 @@ fi
 test -f "${DATA_ROOT}/benchmarks/tiny_imagenet.npz"
 mkdir -p "${RUN_DIR}/logs"
 
-python experiments/benchmark/run_tiny_imagenet_pilot.py plan \
+python -m dropout_mft.experiments.benchmark vision plan \
   --run-dir "${RUN_DIR}" --stage lr_search --depth 12
 
 common="PROJECT_DIR=${PROJECT_DIR},RUN_DIR=${RUN_DIR},VENV_DIR=${VENV_DIR}"
@@ -52,9 +52,9 @@ echo "vision lr_search MLP   ${lr_mlp}"
 echo "vision lr_search ViT   ${lr_vit}"
 
 select_wrap="source ${VENV_DIR}/bin/activate && cd ${PROJECT_DIR} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run.py select \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark benchmark select \
 --run-dir ${RUN_DIR} --stage lr_search && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run_tiny_imagenet_pilot.py plan \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark vision plan \
 --run-dir ${RUN_DIR} --stage confirm --depth 12"
 
 select_job=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
@@ -72,7 +72,7 @@ echo "vision confirm MLP     ${confirm_mlp}"
 echo "vision confirm ViT     ${confirm_vit}"
 
 aggregate_wrap="source ${VENV_DIR}/bin/activate && cd ${PROJECT_DIR} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run.py aggregate \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark benchmark aggregate \
 --run-dir ${RUN_DIR}"
 
 aggregate_job=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
@@ -85,7 +85,7 @@ aggregate_job=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
 echo "aggregate              ${aggregate_job}"
 
 echo
-python experiments/benchmark/run_tiny_imagenet_pilot.py cost
+python -m dropout_mft.experiments.benchmark vision cost
 echo "At most $((2 * CONCURRENT_PER_MODEL)) H100s run concurrently."
 echo "Track with: squeue -u \$USER"
-echo "Progress: python experiments/benchmark/run.py status --run-dir ${RUN_DIR}"
+echo "Progress: python -m dropout_mft.experiments.benchmark benchmark status --run-dir ${RUN_DIR}"

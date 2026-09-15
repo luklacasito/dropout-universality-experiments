@@ -38,7 +38,6 @@ from dropout_mft.experiments.benchmark.datasets import (  # noqa: E402
     FI2010_DEFAULT_EMBARGO,
 )
 
-
 TINY_IMAGENET_URL = "http://cs231n.stanford.edu/tiny-imagenet-200.zip"
 FI2010_INFO = (
     "FI-2010 must be downloaded manually from the Fairdata repository:\n"
@@ -104,7 +103,9 @@ def _save(root: Path, name: str, features_mlp, features_sequence, labels) -> Non
         )
     observed = int(labels.max()) + 1
     if observed != spec.classes:
-        raise ValueError(f"{name}: found {observed} classes, spec expects {spec.classes}")
+        raise ValueError(
+            f"{name}: found {observed} classes, spec expects {spec.classes}"
+        )
     needed = spec.train_size + spec.validation_size + spec.test_size
     if len(labels) < needed:
         raise ValueError(f"{name}: {len(labels)} examples, protocol needs {needed}")
@@ -241,8 +242,9 @@ def prepare_fi2010(
     if available < required_snapshots:
         longest = max(
             range(1, len(FI2010_STOCK_BOUNDARIES)),
-            key=lambda index: FI2010_STOCK_BOUNDARIES[index]
-            - FI2010_STOCK_BOUNDARIES[index - 1],
+            key=lambda index: (
+                FI2010_STOCK_BOUNDARIES[index] - FI2010_STOCK_BOUNDARIES[index - 1]
+            ),
         )
         raise SystemExit(
             f"FI-2010 stock {stock} has a {available}-snapshot block, the locked "
@@ -320,7 +322,9 @@ def prepare_tiny_imagenet(root: Path, raw: Path):
     # Channel-first float in [0, 1]; the loader z-scores with train statistics.
     stacked = np.stack(images).transpose(0, 3, 1, 2).astype(np.float32) / 255.0
     labels_array = np.asarray(labels, dtype=np.int64)
-    _save(root, "tiny_imagenet", stacked.reshape(len(stacked), -1), stacked, labels_array)
+    _save(
+        root, "tiny_imagenet", stacked.reshape(len(stacked), -1), stacked, labels_array
+    )
 
 
 _TOKEN = re.compile(r"[a-z0-9']+")
@@ -349,9 +353,7 @@ def prepare_amazon_reviews(root: Path, *, pool: int = 60_000, seed: int = 202608
     # untouched and available as an external check later.
     # Use the canonical namespace explicitly.  Bare legacy dataset names are
     # no longer accepted by newer huggingface_hub URI parsing.
-    stream = load_dataset(
-        "fancyzhx/amazon_polarity", split="train", streaming=True
-    )
+    stream = load_dataset("fancyzhx/amazon_polarity", split="train", streaming=True)
     rng = np.random.default_rng(seed)
     texts: list[str] = []
     labels: list[int] = []
@@ -404,8 +406,7 @@ def prepare_speech_commands(root: Path, raw: Path, *, mels: int = 64, frames: in
         import torchaudio
     except ImportError as exc:  # pragma: no cover - dependency error
         raise SystemExit(
-            "Speech Commands preparation requires torchaudio:\n"
-            "  pip install torchaudio"
+            "Speech Commands preparation requires torchaudio:\n  pip install torchaudio"
         ) from exc
 
     raw.mkdir(parents=True, exist_ok=True)
@@ -457,9 +458,7 @@ def prepare_speech_commands(root: Path, raw: Path, *, mels: int = 64, frames: in
                 else:
                     waveform = waveform.transpose(0, 1)
             if rate != sample_rate:
-                waveform = torchaudio.functional.resample(
-                    waveform, rate, sample_rate
-                )
+                waveform = torchaudio.functional.resample(waveform, rate, sample_rate)
             usable = min(waveform.shape[-1], sample_rate)
             clips[offset, :usable] = waveform[0, :usable]
             labels[index] = label_ids[label]

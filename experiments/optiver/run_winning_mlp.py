@@ -16,10 +16,10 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from dropout_mft.experiments.optiver.winning_mlp import (  # noqa: E402
-    WinningMLPTrial,
     DEEP_PROFILE_IDS,
     EPOCH_PROBE_PROTOCOL,
     SHALLOW_PROFILE_IDS,
+    WinningMLPTrial,
     confirmation_trials,
     epoch_probe_trials,
     load_feature_cache,

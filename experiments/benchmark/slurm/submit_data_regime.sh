@@ -68,7 +68,7 @@ if [[ ! -f "${DATA_ROOT}/benchmarks/${DATASET}.npz" ]]; then
 fi
 
 mkdir -p "${RUN_DIR}/logs"
-python experiments/benchmark/run_data_regime.py plan \
+python -m dropout_mft.experiments.benchmark data_regimes plan \
   --run-dir "${RUN_DIR}" --regime "${REGIME}" --stage lr_search
 
 common="PROJECT_DIR=${PROJECT_DIR},RUN_DIR=${RUN_DIR},VENV_DIR=${VENV_DIR}"
@@ -132,9 +132,9 @@ submit_select_and_plan() {
   local stage="$1" next_stage="$2" dependency="$3" job_name="$4"
   local wrap raw
   wrap="source ${VENV_DIR}/bin/activate && cd ${PROJECT_DIR} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run.py select \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark benchmark select \
 --run-dir ${RUN_DIR} --stage ${stage} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run_data_regime.py plan \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark data_regimes plan \
 --run-dir ${RUN_DIR} --regime ${REGIME} --stage ${next_stage}"
   raw=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
     --partition=GPU-shared --gpus="${CONTROL_GPU_TYPE}:1" \
@@ -182,7 +182,7 @@ echo "${REGIME} confirm MLP         ${confirm_mlp}"
 echo "${REGIME} confirm Transformer ${confirm_transformer}"
 
 aggregate_wrap="source ${VENV_DIR}/bin/activate && cd ${PROJECT_DIR} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run.py aggregate \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark benchmark aggregate \
 --run-dir ${RUN_DIR}"
 aggregate_raw=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
   --partition=GPU-shared --gpus="${CONTROL_GPU_TYPE}:1" \
@@ -195,7 +195,7 @@ aggregate_job=$(parse_job_id "${aggregate_raw}")
 echo "aggregate                     ${aggregate_job}"
 
 echo
-python experiments/benchmark/run_data_regime.py cost --regime "${REGIME}"
+python -m dropout_mft.experiments.benchmark data_regimes cost --regime "${REGIME}"
 chain_jobs=(
   "${canary_mlp}" "${canary_transformer}"
   "${lr_mlp}" "${lr_transformer}" "${select_lr}"
@@ -208,6 +208,6 @@ printf '%s\n' "${aggregate_job}" >"${RUN_DIR}/slurm-aggregate-job.txt"
 echo "At most $((2 * CONCURRENT_PER_MODEL)) H100s run concurrently."
 echo "Canary success gates each model's one-trial-per-task arrays."
 echo "CHAIN_JOBS=${chain_jobs_csv}"
-echo "Track: python experiments/benchmark/run.py status --run-dir ${RUN_DIR}"
+echo "Track: python -m dropout_mft.experiments.benchmark benchmark status --run-dir ${RUN_DIR}"
 echo "Checkpoints: ${RUN_DIR}/checkpoints (confirmation only)"
 echo "W&B spool: ${RUN_DIR}/wandb"

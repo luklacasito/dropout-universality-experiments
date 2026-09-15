@@ -8,7 +8,6 @@ from numbers import Integral
 
 import numpy as np
 
-
 DISPLAY_NAMES = {
     "none": "No dropout",
     "constant": "Constant",
@@ -45,6 +44,67 @@ FIELD_EXPONENTS = {
     "smooth": 1 / 2,
     "kinked": 1 / 3,
 }
+
+
+def comparison_profile_cap(profile_id: str, mean_dropout: float) -> float:
+    """Declared cap for the shared step, big-step, and linear comparisons."""
+    if profile_id == "big_step":
+        return max(0.30, 3.0 * mean_dropout)
+    if profile_id in {"linear_early", "linear_late"}:
+        return max(0.20, 2.0 * mean_dropout)
+    return 0.20
+
+
+def named_profile_layers(
+    profile_id: str,
+    depth: int,
+    mean_dropout: float,
+    max_dropout: float,
+    *,
+    sampling="endpoints",
+) -> list[float]:
+    """Build a study profile using its declared discrete sampling convention.
+
+    Historical and benchmark linear profiles sample the endpoints. Continuous
+    scale-transfer profiles sample cell centers; changing this changes a trial.
+    Quadratic/quartic comparison profiles use the existing cell-center builder.
+    """
+    if sampling not in {"endpoints", "cell_centers"}:
+        raise ValueError(f"Unknown profile sampling convention: {sampling!r}")
+    if profile_id in {"none", "none_tuned", "none_lr_matched"}:
+        return [0.0] * depth
+    valid = {"uniform", "big_step"} | {
+        f"{family}_{direction}"
+        for family in ("linear", "quadratic", "quartic", "step")
+        for direction in ("early", "late")
+    }
+    if profile_id not in valid:
+        raise ValueError(f"Unknown profile: {profile_id!r}")
+    family = profile_id.rsplit("_", 1)[0]
+    powers = {"uniform": 0.0, "linear": 1.0, "quadratic": 2.0, "quartic": 4.0}
+    if profile_id == "uniform":
+        family = "uniform"
+    if family in powers and (
+        sampling == "cell_centers" or family in {"quadratic", "quartic"}
+    ):
+        return power_profile_layers(
+            depth,
+            mean_dropout,
+            powers[family],
+            orientation="late" if profile_id.endswith("_late") else "early",
+            h_max=max_dropout,
+        )
+    names = {
+        "uniform": "constant",
+        "linear_early": "reverse_linear",
+        "linear_late": "linear",
+        "step_early": "reverse_step",
+        "step_late": "step",
+        "big_step": "big_step",
+    }
+    if profile_id not in names:
+        raise ValueError(f"Unknown profile: {profile_id!r}")
+    return schedule_layers(names[profile_id], depth, mean_dropout, max_dropout)
 
 
 def _rescale_profile(

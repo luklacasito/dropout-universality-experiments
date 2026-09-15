@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import matplotlib as mpl
 
-
 COLORS = {
     "smooth": "#3A5F3A",
     "kink": "#C9A961",

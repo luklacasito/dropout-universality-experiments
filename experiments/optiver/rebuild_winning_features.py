@@ -26,7 +26,6 @@ from typing import Callable
 
 import numpy as np
 
-
 FEATURE_CELLS = (0, 2, 4, 5, 7, 8, 10, 18, 19, 20, 22, 23, 24, 25, 27, 28, 30)
 
 

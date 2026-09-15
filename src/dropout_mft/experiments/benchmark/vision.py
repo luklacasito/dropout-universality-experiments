@@ -12,6 +12,9 @@ chosen under dropout from accidentally weakening the control.
 
 from __future__ import annotations
 
+import argparse
+from pathlib import Path
+
 from dropout_mft.experiments.benchmark.protocol import (
     BENCHMARK_PROFILE_IDS,
     CAP_EXEMPT_PROFILES,
@@ -25,7 +28,10 @@ from dropout_mft.experiments.benchmark.protocol import (
     ModelKind,
     _spec_defaults,
 )
-
+from dropout_mft.experiments.benchmark.workflow import (
+    load_selection,
+    save_plan,
+)
 
 VISION_COHORT_ID = "tiny-imagenet-depth12-all-schedules-v1"
 VISION_DATASET = "tiny_imagenet"
@@ -133,3 +139,54 @@ def vision_trial_count() -> dict[str, int]:
         for model_kind in VISION_MODEL_KINDS
     )
     return {"lr_search": lr_search, "confirm": confirm, "total": lr_search + confirm}
+
+
+def command_plan(args: argparse.Namespace) -> None:
+    run_dir = Path(args.run_dir)
+    if args.stage == "lr_search":
+        specs = [
+            spec
+            for model_kind in VISION_MODEL_KINDS
+            for spec in vision_lr_search_specs(model_kind, depth=args.depth)
+        ]
+    else:
+        selection = load_selection(run_dir, "lr_search")
+        specs = []
+        for model_kind in VISION_MODEL_KINDS:
+            cell = f"tiny_imagenet/{model_kind}"
+            if cell not in selection:
+                raise SystemExit(f"Missing vision selection for {cell}")
+            specs.extend(
+                vision_confirm_specs(
+                    model_kind,
+                    selection[cell],
+                    depth=args.depth,
+                )
+            )
+
+    save_plan(run_dir, args.stage, specs)
+
+
+def command_cost(_args: argparse.Namespace) -> None:
+    for stage, count in vision_trial_count().items():
+        print(f"{stage:14s} {count:5d} trials")
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    commands = parser.add_subparsers(dest="command", required=True)
+
+    plan = commands.add_parser("plan")
+    plan.add_argument("--run-dir", required=True)
+    plan.add_argument("--stage", choices=("lr_search", "confirm"), required=True)
+    plan.add_argument("--depth", type=int, default=12)
+    plan.set_defaults(func=command_plan)
+
+    cost = commands.add_parser("cost")
+    cost.set_defaults(func=command_cost)
+    return parser
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = build_parser().parse_args(argv)
+    args.func(args)

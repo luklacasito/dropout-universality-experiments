@@ -22,7 +22,6 @@ from pathlib import Path
 
 import numpy as np
 
-
 NULL_CHECK_COLUMNS = (
     "book.log_return1.realized_volatility",
     "book_150.log_return1.realized_volatility",

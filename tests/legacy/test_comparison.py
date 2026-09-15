@@ -19,8 +19,8 @@ from dropout_mft.experiments.legacy.analysis import (
     validate_complete_cohort,
 )
 from dropout_mft.experiments.legacy.protocol import (
-    LEGACY_PROFILE_IDS,
     LEGACY_EXTENSION_PROFILE_IDS,
+    LEGACY_PROFILE_IDS,
     LEGACY_SEEDS,
     LEGACY_TEST_INDEX_HASH,
     LEGACY_TRAIN_INDEX_HASH,
@@ -33,7 +33,6 @@ from dropout_mft.experiments.legacy.protocol import (
     run_legacy_trial,
     write_legacy_manifest,
 )
-
 
 FROZEN_PROVENANCE = {
     "schema_version": 1,
@@ -131,9 +130,7 @@ def test_manifest_is_deterministic_provenance_bound_and_tamper_evident(tmp_path)
 
 
 def test_machine_readable_preflight_covers_matching_and_no_pooling():
-    script = (
-        Path(__file__).resolve().parents[2] / "experiments" / "legacy" / "run.py"
-    )
+    script = Path(__file__).resolve().parents[2] / "experiments" / "legacy" / "run.py"
     module_spec = importlib.util.spec_from_file_location("legacy_runner", script)
     assert module_spec and module_spec.loader
     runner = importlib.util.module_from_spec(module_spec)

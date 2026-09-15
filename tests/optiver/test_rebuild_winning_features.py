@@ -6,7 +6,9 @@ from pathlib import Path
 
 def test_build_paths_are_resolved_before_chdir(tmp_path, monkeypatch):
     project = Path(__file__).resolve().parents[2]
-    namespace = runpy.run_path(project / "experiments/optiver/rebuild_winning_features.py")
+    namespace = runpy.run_path(
+        project / "experiments/optiver/rebuild_winning_features.py"
+    )
     canonical_build_paths = namespace["_canonical_build_paths"]
     monkeypatch.chdir(tmp_path)
 
@@ -24,12 +26,12 @@ def test_build_paths_are_resolved_before_chdir(tmp_path, monkeypatch):
 
 def test_mahalanobis_covariance_is_rewritten_for_modern_sklearn():
     project = Path(__file__).resolve().parents[2]
-    namespace = runpy.run_path(project / "experiments/optiver/rebuild_winning_features.py")
+    namespace = runpy.run_path(
+        project / "experiments/optiver/rebuild_winning_features.py"
+    )
     cell_source = namespace["_cell_source"]
     notebook = {
-        "cells": [
-            {"source": []} for _ in range(10)
-        ]
+        "cells": [{"source": []} for _ in range(10)]
         + [
             {
                 "source": [
@@ -43,7 +45,4 @@ def test_mahalanobis_covariance_is_rewritten_for_modern_sklearn():
     transformed = cell_source(notebook, 10)
 
     assert "metric_params={'V':" not in transformed
-    assert (
-        "metric_params={'VI':np.linalg.inv(np.cov(pivot.values.T))}"
-        in transformed
-    )
+    assert "metric_params={'VI':np.linalg.inv(np.cov(pivot.values.T))}" in transformed

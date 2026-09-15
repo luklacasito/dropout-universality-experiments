@@ -15,7 +15,6 @@ from dropout_mft.training import (
     load_cifar_bundle,
 )
 
-
 LEGACY_TEST_INDEX_HASH = (
     "6fce1ad32c7b2b132d367364e713742bca4d46be2ea9b80180072113b2afae51"
 )

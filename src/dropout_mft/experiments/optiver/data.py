@@ -24,7 +24,6 @@ from dropout_mft.models import MLPConfig, SequenceTransformer, build_mlp, make_o
 from dropout_mft.schedules import schedule_layers
 from dropout_mft.training import make_multiplicative_cosine_scheduler, seed_everything
 
-
 OPTIVER_COMPETITION = "optiver-realized-volatility-prediction"
 OPTIVER_SPLIT_PROTOCOL = "optiver_time_id_group_disjoint_hash_v1"
 OPTIVER_CACHE_SCHEMA = 1

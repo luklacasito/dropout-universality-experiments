@@ -1,0 +1,398 @@
+{
+  "benchmark/budget/amazon_reviews/mlp": {
+    "sha256": "cd9e74164b7981d2c284d108f42e16ca7ea7329e4846c9cf49793d4e688bb48a",
+    "trials": 36
+  },
+  "benchmark/budget/amazon_reviews/transformer": {
+    "sha256": "9b89db13b85b283fe891da28e6f2efda5373b0a1c404725dcbf7d4fff25ab379",
+    "trials": 36
+  },
+  "benchmark/budget/fi2010/mlp": {
+    "sha256": "28ed96f1123fca994f404b8d60ab1da1a1dfb4b489be04ce10db1cc5fb2f6fb9",
+    "trials": 36
+  },
+  "benchmark/budget/fi2010/transformer": {
+    "sha256": "b3b673c6690cf96d7c4d7257dde29b27bfa72f9bf955aad905bf11eb13a6cbf2",
+    "trials": 36
+  },
+  "benchmark/budget/openml_jannis/mlp": {
+    "sha256": "7fefe5542c3f170c5a59366aa39cf9135a7127594f0eab4211dc5ca17330d5de",
+    "trials": 36
+  },
+  "benchmark/budget/openml_jannis/transformer": {
+    "sha256": "8234022bcb569cfde5419e35c3e564e05a0bac07ba9d658459849dfbfe5c7e8b",
+    "trials": 36
+  },
+  "benchmark/budget/speech_commands/mlp": {
+    "sha256": "2995afa821980c42d70d18cd84774f81a0cdf7801ba65f115252cc57f6064169",
+    "trials": 36
+  },
+  "benchmark/budget/speech_commands/transformer": {
+    "sha256": "f363598e0ea10d7d1a7396d7cf9ee834bfff0dbe61961957e53f43d63c6f07f9",
+    "trials": 36
+  },
+  "benchmark/budget/tiny_imagenet/mlp": {
+    "sha256": "0b91c1e3233bab4e41d96c177240f93e2645e7b539231f0a6a3f89369136165e",
+    "trials": 36
+  },
+  "benchmark/budget/tiny_imagenet/transformer": {
+    "sha256": "7b617370dfaa8930cb64f0cea389cf8940f1b6ea5110927911b305be3e0ecc1f",
+    "trials": 36
+  },
+  "benchmark/confirm/amazon_reviews/mlp": {
+    "sha256": "34729ce04a94acf71ec863ed0abe58b6beed4fb284a6ab2471299504ed4a5b4a",
+    "trials": 20
+  },
+  "benchmark/confirm/amazon_reviews/transformer": {
+    "sha256": "d0b0cd73a6a652d33e6e8b207feacd379dd4c5f656d95e8e8a7dfc2142bc94fc",
+    "trials": 20
+  },
+  "benchmark/confirm/fi2010/mlp": {
+    "sha256": "c060a703de44f8dadeee2658498b9f6b8fb9f5b5b61ca14d664cc4898cf68cd5",
+    "trials": 20
+  },
+  "benchmark/confirm/fi2010/transformer": {
+    "sha256": "8bf6b84100af2d63dd0e1e33a640ed7f51e14afc5ffbe66235f7243fff0680eb",
+    "trials": 20
+  },
+  "benchmark/confirm/openml_jannis/mlp": {
+    "sha256": "89e4f80662141d891b119ae76373d3a5d238a6673d3815fff339ae44c1fe7695",
+    "trials": 20
+  },
+  "benchmark/confirm/openml_jannis/transformer": {
+    "sha256": "be06d2baf792aa4f79b84996a9a96e43975a7a4b58f6c7430b52eb19f4fcb426",
+    "trials": 20
+  },
+  "benchmark/confirm/speech_commands/mlp": {
+    "sha256": "06049e76f8d8abccbf8c3410e72402084ed13683d48465c77f0aec896942063d",
+    "trials": 20
+  },
+  "benchmark/confirm/speech_commands/transformer": {
+    "sha256": "a48c2e92b4610d7f47c6f815c75314afe411f931d54d90ffecbbc3faa491e516",
+    "trials": 20
+  },
+  "benchmark/confirm/tiny_imagenet/mlp": {
+    "sha256": "10ad66a672718e54e1a90b8fa3157b61189de836d571705934c2f1e570577192",
+    "trials": 20
+  },
+  "benchmark/confirm/tiny_imagenet/transformer": {
+    "sha256": "b47c376e042a2827d18df80475e2154494210889c0ca818b6a87d41216a55bb1",
+    "trials": 20
+  },
+  "benchmark/lr/amazon_reviews/mlp": {
+    "sha256": "1a3938d106305720c340ac5f6f864442dd4848d7f8063b0bd29f435b6da2ab2b",
+    "trials": 15
+  },
+  "benchmark/lr/amazon_reviews/transformer": {
+    "sha256": "4474128e2128acafebda99987b261bcb72529e1b9ab41ce1a803780c010a5eed",
+    "trials": 15
+  },
+  "benchmark/lr/fi2010/mlp": {
+    "sha256": "7b1d118d8de314de4a123010173917377040c6a1723b60b8d47a7477a22f2e05",
+    "trials": 15
+  },
+  "benchmark/lr/fi2010/transformer": {
+    "sha256": "d05efae36c64b3a6d0d63f94fd9dd26b7684a3226bb51880366ba80362b67656",
+    "trials": 15
+  },
+  "benchmark/lr/openml_jannis/mlp": {
+    "sha256": "6e9f834ec1fb01366da58cd0b2973d060c70da7d1657de21e487194955ba46f2",
+    "trials": 15
+  },
+  "benchmark/lr/openml_jannis/transformer": {
+    "sha256": "d5536c25e6f424663f78175abb1b01d4fa258be76172ae8efd9b3f9d8fd1e51e",
+    "trials": 15
+  },
+  "benchmark/lr/speech_commands/mlp": {
+    "sha256": "15043ae41b3c3cfabb53eb74d5431ef6b65f1dc1e53b633c24c988b3945d9281",
+    "trials": 15
+  },
+  "benchmark/lr/speech_commands/transformer": {
+    "sha256": "d1c64b535fd67a0a194bb25b3447b2658288f446aed5e97353d8c9ed9b378dfe",
+    "trials": 15
+  },
+  "benchmark/lr/tiny_imagenet/mlp": {
+    "sha256": "1a014b93733086f5942e546377dc8a46c36f1fde9750627a861952c3014dbe41",
+    "trials": 15
+  },
+  "benchmark/lr/tiny_imagenet/transformer": {
+    "sha256": "eef2a1ec75cc5853265fd6e12ae9efd685432d30a0595f6e007e5590992fce8e",
+    "trials": 15
+  },
+  "jannis/confirm": {
+    "sha256": "25007d6bfbb9040bfeedcc140795135061be9548edd644eebbd7405f5f643cf2",
+    "trials": 60
+  },
+  "regime/budget/amazon_n2000/mlp": {
+    "sha256": "2bc392cae496f4e0ff830f96ba011a05b561763319bac3f04d16d1440fc2dc84",
+    "trials": 60
+  },
+  "regime/budget/amazon_n2000/transformer": {
+    "sha256": "4040c01d4d57ad77581b4c580860b2cd5a417ac3f6423b1389b5f6671db4d8cd",
+    "trials": 60
+  },
+  "regime/budget/amazon_n20000/mlp": {
+    "sha256": "781c8519c3d8fa34563d8bdf0d4957fa41296e537757eca80d021c502bfeb1ae",
+    "trials": 60
+  },
+  "regime/budget/amazon_n20000/transformer": {
+    "sha256": "e598870d7f379ceeccab0071df06c88e3109629fae4cfe2f60e63327f9a93cb6",
+    "trials": 60
+  },
+  "regime/budget/amazon_n5000/mlp": {
+    "sha256": "f100bf89fbe65d6e848271aab57b14b80fe248650599a901d8172d792c7ac155",
+    "trials": 60
+  },
+  "regime/budget/amazon_n5000/transformer": {
+    "sha256": "b96bc982933a4e5ac734ba01ab4f49b366221279bd5c97db6314d4aac1a42612",
+    "trials": 60
+  },
+  "regime/budget/tiny_n80000/mlp": {
+    "sha256": "063d562ea1abc28a2932fcda62c899c52b99703bbfbb335536774515ec78fe1a",
+    "trials": 60
+  },
+  "regime/budget/tiny_n80000/transformer": {
+    "sha256": "34d12486cd9e85f6c555b72001414d8f4b64ba036fe7041915f69ef71300be5f",
+    "trials": 60
+  },
+  "regime/confirm/amazon_n2000/mlp": {
+    "sha256": "136e5f4d6decc7fa5e72cd6151e12c33d1af0175302f09102d8f8c9cb7e35544",
+    "trials": 30
+  },
+  "regime/confirm/amazon_n2000/transformer": {
+    "sha256": "8c0647452be0e7451484faa4009fe52cecaa19fdc9192a98b7dbd109869e90f7",
+    "trials": 30
+  },
+  "regime/confirm/amazon_n20000/mlp": {
+    "sha256": "ba2e387e017820ec6193170c3fb266987ff229535331964fcf7975ef0d63aecb",
+    "trials": 30
+  },
+  "regime/confirm/amazon_n20000/transformer": {
+    "sha256": "961555aa8bda376de0d6193c0118e7b0c83f06a5df0dfe214b2ef5bab8f4629a",
+    "trials": 30
+  },
+  "regime/confirm/amazon_n5000/mlp": {
+    "sha256": "500fd0f9268a3daf1af36ed14ee52b20883ff98876ca2bfa67aa984d1ae8e23d",
+    "trials": 30
+  },
+  "regime/confirm/amazon_n5000/transformer": {
+    "sha256": "5836aa969fdc45a4fb9076f07e376c1fa92bce98651ab8c83f5ef5f7511c81a3",
+    "trials": 30
+  },
+  "regime/confirm/tiny_n80000/mlp": {
+    "sha256": "8593953ca9865834abc7ce5f9c84dd84600effe956275b09b81f42ce801960b1",
+    "trials": 30
+  },
+  "regime/confirm/tiny_n80000/transformer": {
+    "sha256": "f497b51be47618478d178784709a1c974fea546cc561d776fb70fa879fd31eb6",
+    "trials": 30
+  },
+  "regime/lr/amazon_n2000/mlp": {
+    "sha256": "70a47fdbf45e6873facd15a409b28767bafcc5de3339cc4a7dd252f19847be57",
+    "trials": 30
+  },
+  "regime/lr/amazon_n2000/transformer": {
+    "sha256": "89cfec3b3c5a1b2ccaff84a268f2d249c063c93deae94bf08e48fab7f1117021",
+    "trials": 30
+  },
+  "regime/lr/amazon_n20000/mlp": {
+    "sha256": "14310fbdff6173592e8c1ef101463d43b85c3efe66324ecbae5c0f627fbd79ba",
+    "trials": 30
+  },
+  "regime/lr/amazon_n20000/transformer": {
+    "sha256": "542c5f709578b714391d4817222ddf637b2e0173e9752d32d28335ef52a378c5",
+    "trials": 30
+  },
+  "regime/lr/amazon_n5000/mlp": {
+    "sha256": "0334694aab7ac3a12d22ffc98d07be1f2a7e8b6b84f4e781a72584223e0c3467",
+    "trials": 30
+  },
+  "regime/lr/amazon_n5000/transformer": {
+    "sha256": "2fa1c7745de0377f8dfd5dca42cbd8c25f6ef3150cc34136a8525249412aa9cf",
+    "trials": 30
+  },
+  "regime/lr/tiny_n80000/mlp": {
+    "sha256": "fdfb8a426f4c56f9d00de152e69fd84671b6f9dd3d47a06466b38e9ae38b0120",
+    "trials": 30
+  },
+  "regime/lr/tiny_n80000/transformer": {
+    "sha256": "2589d16ee0e1c2eeeafeb5837dfda8f17281ec604497c3ca72651c5608a4b472",
+    "trials": 30
+  },
+  "sidecar/confirm/fi2010": {
+    "sha256": "64649f99ac98c6f419f2f7ee538df0fce6a87b1cdc2fa54a98155216d8ba3b93",
+    "trials": 10
+  },
+  "sidecar/confirm/openml_jannis": {
+    "sha256": "e5873d052b36c4c07834e5bec3b871682aa23988e393220a6577402a62b8e1b6",
+    "trials": 10
+  },
+  "sidecar/lr/fi2010": {
+    "sha256": "44139e783d7e116237346b83cc46a73194d47c664f30e45cbe94639939258342",
+    "trials": 15
+  },
+  "sidecar/lr/openml_jannis": {
+    "sha256": "bd8001e9e6ca697d0752694f128a8846496a8528879ac6b589e9aa69c5172067",
+    "trials": 15
+  },
+  "vision/confirm/mlp": {
+    "sha256": "e1ebf3b5fcd7aa188b17ac229b3d78091026522db6b9aa0ea7085914ff7a4a59",
+    "trials": 30
+  },
+  "vision/confirm/transformer": {
+    "sha256": "dd9d30b757d7f4851885e2c496836641efa3c756c406f0f05beae3054b477c5a",
+    "trials": 30
+  },
+  "vision/lr/mlp": {
+    "sha256": "df1bca9c7d08ef43daab9b9e803dd0640c946f9df4f9b4edf04dcfdabb2ba18d",
+    "trials": 30
+  },
+  "vision/lr/transformer": {
+    "sha256": "fbc1a6cd669595675929b49ef6114a69fa1011c7694c7fc1dfa5c56735a0c6ce",
+    "trials": 30
+  },
+  "vision_zero/budget/mlp": {
+    "sha256": "0032b3b6ecb59aa776908ac1564274328ae8008437f4e484e3f680cc6ef6d472",
+    "trials": 60
+  },
+  "vision_zero/budget/transformer": {
+    "sha256": "6a48a0a5c46864dc00b94942b37555271ec1fe4ea7b6f8d7b0956d0e3ea8ab5f",
+    "trials": 60
+  },
+  "vision_zero/confirm/mlp": {
+    "sha256": "da3f5910c85f40bd8400fce5437db76f3540d7bbb7433b045a71267958d0a3f9",
+    "trials": 30
+  },
+  "vision_zero/confirm/transformer": {
+    "sha256": "78e975fb90da8049310fbc09ea4877dd15e86c47946547aee9560777aee2d924",
+    "trials": 30
+  },
+  "vision_zero/lr/mlp": {
+    "sha256": "cc03c48ab03ce3067fbfba0c0733288dccb4786301b51c0f17f44c60ab556415",
+    "trials": 30
+  },
+  "vision_zero/lr/transformer": {
+    "sha256": "df24597df4b83e6cd49391ac345e78b352acf936cd45f961eb84bb51a5bdd2b6",
+    "trials": 30
+  },
+  "zero/budget/amazon_reviews/mlp": {
+    "sha256": "9d6d1586dcf008c2a9a97b16ed92f8e4ee3ac49dffd5fe3ff6275a97c09684a5",
+    "trials": 60
+  },
+  "zero/budget/amazon_reviews/transformer": {
+    "sha256": "d57a08f65492953d98923277fd880cc00020f688e4197ffd785521a2a113dd49",
+    "trials": 60
+  },
+  "zero/budget/fi2010/mlp": {
+    "sha256": "825ab6795e58f6b4add29d0c59db40b277317131afdf272383edef2a99813389",
+    "trials": 60
+  },
+  "zero/budget/fi2010/transformer": {
+    "sha256": "ca6712163f8c35f349146c2559e5cca9dbbb95e006419db03881df2efbfc710e",
+    "trials": 60
+  },
+  "zero/budget/openml_jannis/mlp": {
+    "sha256": "467ed7e28f846899ae28a68590c1225b61fbd4caf3b83bb845868ebfa0a321cc",
+    "trials": 60
+  },
+  "zero/budget/openml_jannis/transformer": {
+    "sha256": "485669f19b15391d755fccc47caab70906de4ddd78946c5f50877e9fd423e4a3",
+    "trials": 60
+  },
+  "zero/budget/speech_commands/mlp": {
+    "sha256": "1651014081961e099ba3f604643f09325ae8a05e09a56916d8f7bbc59ceca785",
+    "trials": 60
+  },
+  "zero/budget/speech_commands/transformer": {
+    "sha256": "b51cdf26885e1e9cd5bfd486a79bce5790e7a4b24457b4b306034a8a7ae9df84",
+    "trials": 60
+  },
+  "zero/budget/tiny_imagenet/mlp": {
+    "sha256": "671d37bc5176f38fd0b94b9143191460258c6226c1f661ab8fb7915d29d79d34",
+    "trials": 60
+  },
+  "zero/budget/tiny_imagenet/transformer": {
+    "sha256": "adf52c01515e00f6ef11f6f7a224d375a27ed13ec1419e8b9c5d3a087b93c693",
+    "trials": 60
+  },
+  "zero/confirm/amazon_reviews/mlp": {
+    "sha256": "956c160852e0f5651321e815c6a3810516e4ba3afd997223868ae671b84d646f",
+    "trials": 30
+  },
+  "zero/confirm/amazon_reviews/transformer": {
+    "sha256": "a9e99b95297ec727602329623d5efd1e00460fbdccaa2f45fc0346b5fe6f6230",
+    "trials": 30
+  },
+  "zero/confirm/fi2010/mlp": {
+    "sha256": "7a323e3d6f1f2887f43548ce7c0e8875c66e46888c833c0ad3f875b571f2aeda",
+    "trials": 30
+  },
+  "zero/confirm/fi2010/transformer": {
+    "sha256": "cddb403ad152cbb8a1d56ff21ebc9ddd7b407ae722df878d25530af9dc86106c",
+    "trials": 30
+  },
+  "zero/confirm/openml_jannis/mlp": {
+    "sha256": "2cc39d8b09cd225a3486d33ad44bca9b33fc8cb3d69f85a3c989602f7fcd6ce4",
+    "trials": 30
+  },
+  "zero/confirm/openml_jannis/transformer": {
+    "sha256": "db85bb4d35eda0a0b10f2935338a71b11bc6645b2f0951b028f4175b642f77aa",
+    "trials": 30
+  },
+  "zero/confirm/speech_commands/mlp": {
+    "sha256": "c613d0503509ae68521afb456502504c061fd8901b18720da969d94db52d0a71",
+    "trials": 30
+  },
+  "zero/confirm/speech_commands/transformer": {
+    "sha256": "44488c7316adde8d3e74fedaf0b85c7a6451a2cab2376c0fcd5f293b4451f00b",
+    "trials": 30
+  },
+  "zero/confirm/tiny_imagenet/mlp": {
+    "sha256": "bcb47e4080f06bf505a83807fa7a32c628614c1e65282d4e9c5a4c8538c1b71a",
+    "trials": 30
+  },
+  "zero/confirm/tiny_imagenet/transformer": {
+    "sha256": "1632d3fce202ccedf030183612963d1476f724a05c2c259efbc8ee5f5d724fe5",
+    "trials": 30
+  },
+  "zero/lr/amazon_reviews/mlp": {
+    "sha256": "cd53275f2cd631ae9cdeca5e051908f374cd9615232abbde1b153be63339d137",
+    "trials": 30
+  },
+  "zero/lr/amazon_reviews/transformer": {
+    "sha256": "d52c693b8e05fb4de1fad6de375892ccb52682f82038b5b979dc1e655b0e93a5",
+    "trials": 30
+  },
+  "zero/lr/fi2010/mlp": {
+    "sha256": "16a7267e96fc56bb675081ae5e960b7b0fa98d7b306e2125f42e0b500f1a323a",
+    "trials": 30
+  },
+  "zero/lr/fi2010/transformer": {
+    "sha256": "6edcdc0e9f943dcbe59d8f8ed51898b187568900f80fc3dde6c5dd63344dca77",
+    "trials": 30
+  },
+  "zero/lr/openml_jannis/mlp": {
+    "sha256": "e8124dff8eecaf701752f1d628f535483681841e8c9da161e7f6a8d66c58ac87",
+    "trials": 30
+  },
+  "zero/lr/openml_jannis/transformer": {
+    "sha256": "184b7c8653c1b794d1a380c15912463abd68f0f920e40d1aab73a071d9bca778",
+    "trials": 30
+  },
+  "zero/lr/speech_commands/mlp": {
+    "sha256": "ffdf2deaf10fcc6343ff812309f56744f72d9d6d5cb6adb484d48ad01fef4f68",
+    "trials": 30
+  },
+  "zero/lr/speech_commands/transformer": {
+    "sha256": "5958550e2bccc1a3a3755f96ff9ee955f424c45baf9d5d40b1f240e71c42f9d6",
+    "trials": 30
+  },
+  "zero/lr/tiny_imagenet/mlp": {
+    "sha256": "d13f5e22465cdb7670dd3b6e47761015cb93ef0e6b04636a7558ac769010acd5",
+    "trials": 30
+  },
+  "zero/lr/tiny_imagenet/transformer": {
+    "sha256": "e023358638b28115fd284ac89cd74ee85d1b7b1c7f64037f237185d1ad7ce415",
+    "trials": 30
+  }
+}

@@ -10,8 +10,19 @@ import numpy as np
 import pytest
 import torch
 
-import experiments.benchmark.run as benchmark_cli
-
+from dropout_mft.experiments.benchmark import cli as benchmark_cli
+from dropout_mft.experiments.benchmark.datasets import (
+    BENCHMARK_NAMES,
+    BENCHMARK_SPECS,
+    FI2010_DEFAULT_EMBARGO,
+    NESTED_TRAIN_SPLIT_PROTOCOL,
+    _anchored_split,
+    _balanced_nested_train_split,
+    _load_compressed_npz_rows,
+    _standardize,
+    _standardize_inplace,
+    load_benchmark_bundle,
+)
 from dropout_mft.experiments.benchmark.protocol import (
     BENCHMARK_PROFILE_IDS,
     BUDGET_SEARCH_SEEDS,
@@ -29,29 +40,9 @@ from dropout_mft.experiments.benchmark.protocol import (
     read_benchmark_manifest,
     run_benchmark_trial,
     shard,
-    trial_output_path,
     trial_checkpoint_path,
+    trial_output_path,
     write_benchmark_manifest,
-)
-from dropout_mft.experiments.benchmark.datasets import (
-    BENCHMARK_NAMES,
-    BENCHMARK_SPECS,
-    FI2010_DEFAULT_EMBARGO,
-    NESTED_TRAIN_SPLIT_PROTOCOL,
-    _balanced_nested_train_split,
-    _load_compressed_npz_rows,
-    _standardize,
-    _standardize_inplace,
-    _anchored_split,
-    load_benchmark_bundle,
-)
-from experiments.benchmark.prepare_data import (
-    FI2010_DEFAULT_STOCK,
-    FI2010_FOLD_SNAPSHOTS,
-    FI2010_STOCK_BOUNDARIES,
-    _fi2010_required_window_count,
-    _fi2010_stock_block,
-    _load_fi2010_rows,
 )
 from dropout_mft.experiments.scale_transfer.protocol import _provenance, seed_streams
 from dropout_mft.wandb_tracking import (
@@ -63,7 +54,14 @@ from dropout_mft.wandb_tracking import (
     log_benchmark_wandb_result,
     tracking_is_complete,
 )
-
+from experiments.benchmark.prepare_data import (
+    FI2010_DEFAULT_STOCK,
+    FI2010_FOLD_SNAPSHOTS,
+    FI2010_STOCK_BOUNDARIES,
+    _fi2010_required_window_count,
+    _fi2010_stock_block,
+    _load_fi2010_rows,
+)
 
 MODEL_KINDS = ("mlp", "transformer")
 
@@ -615,7 +613,9 @@ def test_jannis_declared_split_fits_its_minority_class():
 
 
 def test_missing_cache_names_the_preparation_command(tmp_path):
-    with pytest.raises(FileNotFoundError, match="experiments/benchmark/prepare_data.py"):
+    with pytest.raises(
+        FileNotFoundError, match="experiments/benchmark/prepare_data.py"
+    ):
         load_benchmark_bundle("fi2010", root=tmp_path)
 
 

@@ -7,7 +7,6 @@ from collections.abc import Sequence
 
 import numpy as np
 
-from dropout_mft.experiments.scale_transfer.analysis import bootstrap_mean_ci
 from dropout_mft.experiments.legacy.protocol import (
     LEGACY_PROFILE_IDS,
     LEGACY_SCHEMA_VERSION,
@@ -15,7 +14,8 @@ from dropout_mft.experiments.legacy.protocol import (
     LegacyTrialSpec,
     legacy_trial_specs,
 )
-
+from dropout_mft.statistics import bootstrap_mean_ci, exact_paired_signflip_pvalue
+from dropout_mft.statistics import holm_adjust as _holm_adjust
 
 REFERENCE_PROFILE_MAP = {
     "uniform": "constant",
@@ -93,57 +93,6 @@ def _final_arrays(indexed, profile_id: str) -> tuple[np.ndarray, np.ndarray]:
     return loss, accuracy
 
 
-def exact_paired_signflip_pvalue(values: Sequence[float]) -> float:
-    """Exact two-sided paired sign-flip test via meet-in-the-middle sums.
-
-    Twenty-five pairs imply 33,554,432 sign assignments. Enumerating their
-    Cartesian product in Python would be unnecessarily slow; splitting the
-    values into two halves gives two arrays of at most 8,192 signed sums and
-    counts the exact tail with binary searches.
-    """
-
-    values = np.asarray(values, dtype=float)
-    if values.ndim != 1 or not np.all(np.isfinite(values)):
-        raise ValueError("values must be a finite one-dimensional sequence")
-    values = values[values != 0]
-    if len(values) == 0:
-        return 1.0
-    if len(values) > 40:
-        raise ValueError("Exact meet-in-the-middle sign flips are limited to 40 pairs")
-
-    def signed_sums(part: np.ndarray) -> np.ndarray:
-        sums = np.asarray([0.0])
-        for value in part:
-            sums = np.concatenate((sums + value, sums - value))
-        return sums
-
-    midpoint = len(values) // 2
-    left = signed_sums(values[:midpoint])
-    right = np.sort(signed_sums(values[midpoint:]))
-    observed = abs(float(values.sum()))
-    if observed == 0:
-        return 1.0
-    threshold = max(0.0, observed - 1e-14 * max(1.0, observed))
-    extreme = 0
-    for value in left:
-        extreme += int(np.searchsorted(right, -threshold - value, side="right"))
-        extreme += int(
-            len(right) - np.searchsorted(right, threshold - value, side="left")
-        )
-    return float(extreme / (2 ** len(values)))
-
-
-def _holm_adjust(p_values: Sequence[float]) -> np.ndarray:
-    values = np.asarray(p_values, dtype=float)
-    order = np.argsort(values)
-    adjusted = np.empty_like(values)
-    running = 0.0
-    for rank, index in enumerate(order):
-        running = max(running, (len(values) - rank) * values[index])
-        adjusted[index] = min(1.0, running)
-    return adjusted
-
-
 def profile_summary_rows(indexed: dict[tuple[str, int], dict]) -> list[dict]:
     rows = []
     for profile_id in LEGACY_PROFILE_IDS:
@@ -204,7 +153,7 @@ def _paired_row(indexed, candidate_id: str, baseline_id: str, *, ci_seed: int) -
 
 
 def paired_comparison_rows(
-    indexed: dict[tuple[str, int], dict]
+    indexed: dict[tuple[str, int], dict],
 ) -> tuple[list[dict], str]:
     """Run descriptive references and the four prespecified new-profile contrasts."""
 

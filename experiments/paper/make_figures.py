@@ -8,9 +8,8 @@ import math
 import shutil
 from pathlib import Path
 
-import numpy as np
-
 import matplotlib.pyplot as plt
+import numpy as np
 from numpy.polynomial.hermite import hermgauss
 
 from dropout_mft.numerics import (
@@ -111,21 +110,37 @@ def make_critical_exponents() -> None:
     axes[2].loglog(ell, smooth, color=green, label="Smooth tanh")
     axes[2].loglog(ell, kinked, color=gold, label="Kinked ReLU")
     _log_fit(axes[2], ell, 5.0 / ell, COLORS["fit"], r"$\theta_{\rm rel,tanh}=1.00$")
-    _log_fit(axes[2], ell, 55.0 / ell**2, COLORS["theory"], r"$\theta_{\rm rel,ReLU}=1.99$")
+    _log_fit(
+        axes[2], ell, 55.0 / ell**2, COLORS["theory"], r"$\theta_{\rm rel,ReLU}=1.99$"
+    )
     _finish_log_panel(axes[2], r"Layer $\ell$", r"$m_\ell = 1-c_\ell$", "upper right")
 
     h = np.logspace(-3, -0.55, 22)
     _log_points(axes[3], h, 1.65 * h**0.5, "o", green, "Smooth tanh")
     _log_points(axes[3], h, 1.85 * h ** (2 / 3), "s", gold, "Kinked ReLU")
     _log_fit(axes[3], h, 1.65 * h**0.5, COLORS["fit"], r"$1/\delta_{\tanh}=0.50$")
-    _log_fit(axes[3], h, 1.85 * h ** (2 / 3), COLORS["theory"], r"$1/\delta_{\mathrm{ReLU}}=0.67$")
+    _log_fit(
+        axes[3],
+        h,
+        1.85 * h ** (2 / 3),
+        COLORS["theory"],
+        r"$1/\delta_{\mathrm{ReLU}}=0.67$",
+    )
     _finish_log_panel(axes[3], r"Dropout field $h$", r"$m_\ast=1-c_\ast$", "upper left")
 
     _log_points(axes[4], h, 1.1 * h**-0.5, "o", green, "Smooth tanh")
     _log_points(axes[4], h, 0.85 * h ** (-1 / 3), "s", gold, "Kinked ReLU")
     _log_fit(axes[4], h, 1.1 * h**-0.5, COLORS["fit"], r"$\nu_{\rho,\tanh}=0.50$")
-    _log_fit(axes[4], h, 0.85 * h ** (-1 / 3), COLORS["theory"], r"$\nu_{\rho,\mathrm{ReLU}}=0.33$")
-    _finish_log_panel(axes[4], r"Dropout field $h$", r"$\xi = -1/\ln \lambda$", "upper right")
+    _log_fit(
+        axes[4],
+        h,
+        0.85 * h ** (-1 / 3),
+        COLORS["theory"],
+        r"$\nu_{\rho,\mathrm{ReLU}}=0.33$",
+    )
+    _finish_log_panel(
+        axes[4], r"Dropout field $h$", r"$\xi = -1/\ln \lambda$", "upper right"
+    )
 
     for letter, ax in zip("abcde", axes):
         ax.text(
@@ -183,7 +198,9 @@ def _solve_qstar_tanh(sigma_w2: float, sigma_b2: float, rho: float) -> float:
     return float(q)
 
 
-def _tanh_chi_g_h(sigma_w2: float, sigma_b2: float, rho: float) -> tuple[float, float, float, float]:
+def _tanh_chi_g_h(
+    sigma_w2: float, sigma_b2: float, rho: float
+) -> tuple[float, float, float, float]:
     q = _solve_qstar_tanh(sigma_w2, sigma_b2, rho)
     sq = np.sqrt(q)
     ef2 = _gh1(_tanh_phi(sq * _GH_Z) ** 2)
@@ -218,7 +235,9 @@ def _cstar_tanh(sigma_w2: float, sigma_b2: float, rho: float) -> float:
 
 
 def _tune_sigw2_for_chi_tanh(target_chi: float, sigma_b2: float, rho: float) -> float:
-    return solve_bracketed(lambda sw2: _tanh_chi_g_h(sw2, sigma_b2, rho)[1] - target_chi, (0.05, 20.0))
+    return solve_bracketed(
+        lambda sw2: _tanh_chi_g_h(sw2, sigma_b2, rho)[1] - target_chi, (0.05, 20.0)
+    )
 
 
 def _smooth_scaling_points(hs: np.ndarray, t_vals: np.ndarray) -> np.ndarray:
@@ -237,7 +256,9 @@ def _smooth_scaling_points(hs: np.ndarray, t_vals: np.ndarray) -> np.ndarray:
 def _kink_m(t, h, kappa: float = 1.0):
     vals = []
     for ti, hi in np.broadcast(t, h):
-        y = solve_with_expanding_upper(lambda z: kappa * z**3 - ti * z**2 - hi, 0.0, 1.0)
+        y = solve_with_expanding_upper(
+            lambda z: kappa * z**3 - ti * z**2 - hi, 0.0, 1.0
+        )
         vals.append(y * y)
     return np.asarray(vals).reshape(np.broadcast(t, h).shape)
 
@@ -302,20 +323,33 @@ def _draw_scaling_collapse(kind: str, fig, axes) -> None:
             mask = np.isclose(h_proxy, h)
             tau = -t_data[mask] / np.sqrt(2.0 * g_data[mask] * h_data[mask])
             mt = m_data[mask] * np.sqrt(g_data[mask] / (2.0 * h_data[mask]))
-            axes[0].plot(t_data[mask], m_data[mask], "o", color=color, markersize=3, label=rf"$h \approx {h:.0e}$")
-            axes[1].plot(tau, mt, "o", color=color, markersize=3, label=rf"$h \approx {h:.0e}$")
+            axes[0].plot(
+                t_data[mask],
+                m_data[mask],
+                "o",
+                color=color,
+                markersize=3,
+                label=rf"$h \approx {h:.0e}$",
+            )
+            axes[1].plot(
+                tau, mt, "o", color=color, markersize=3, label=rf"$h \approx {h:.0e}$"
+            )
     else:
         kappa = 2.0 * np.sqrt(2.0) / (3.0 * np.pi)
         for color, h in zip(FIELD_PALETTE, hs):
             rho = 1.0 / (1.0 + h)
             chi = 1.0 + t
             m = np.array([1.0 - _cstar_relu(float(chi_i), rho) for chi_i in chi])
-            h_data = np.array([1.0 - _relu_map(1.0, float(chi_i), rho) for chi_i in chi])
+            h_data = np.array(
+                [1.0 - _relu_map(1.0, float(chi_i), rho) for chi_i in chi]
+            )
             tau = -t / (kappa ** (2 / 3) * h_data ** (1 / 3))
             mt = m / ((h_data / kappa) ** (2 / 3))
             h0 = float(h_data[np.argmin(np.abs(t))])
             axes[0].plot(t, m, "s", color=color, markersize=3.5, label=rf"$h={h0:.0e}$")
-            axes[1].plot(tau, mt, "s", color=color, markersize=3.5, label=rf"$h={h0:.0e}$")
+            axes[1].plot(
+                tau, mt, "s", color=color, markersize=3.5, label=rf"$h={h0:.0e}$"
+            )
 
     tt = np.linspace(-1, 2, 400)
     theory = np.sqrt(1.0 + tt * tt) - tt if is_smooth else _kink_collapse_theory(tt)
@@ -328,17 +362,33 @@ def _draw_scaling_collapse(kind: str, fig, axes) -> None:
     axes[0].set_ylabel(r"$m = 1-c_\ast$")
     if is_smooth:
         axes[1].set_title(f"{title}: Universal Collapse")
-    axes[1].set_xlabel(r"$\tilde t$" if is_smooth else r"$u=(1-\chi)/(\kappa^{2/3}h^{1/3})$")
+    axes[1].set_xlabel(
+        r"$\tilde t$" if is_smooth else r"$u=(1-\chi)/(\kappa^{2/3}h^{1/3})$"
+    )
     axes[1].set_ylabel(r"$\tilde{m}$" if is_smooth else r"$m/(h/\kappa)^{2/3}$")
     axes[1].set_xlim(-1 if is_smooth else -1.25, 2)
     axes[1].set_ylim(0, 2.2 if is_smooth else 2.0)
-    legend_kwargs = dict(ncol=2, borderaxespad=0.4, columnspacing=0.9, handletextpad=0.4)
+    legend_kwargs = dict(
+        ncol=2, borderaxespad=0.4, columnspacing=0.9, handletextpad=0.4
+    )
     if is_smooth:
         axes[0].legend(loc="upper left", **legend_kwargs)
         axes[1].legend(loc="upper right", **legend_kwargs)
     else:
-        axes[0].legend(loc="upper left", fancybox=True, shadow=True, framealpha=0.95, **legend_kwargs)
-        axes[1].legend(loc="upper right", fancybox=True, shadow=True, framealpha=0.95, **legend_kwargs)
+        axes[0].legend(
+            loc="upper left",
+            fancybox=True,
+            shadow=True,
+            framealpha=0.95,
+            **legend_kwargs,
+        )
+        axes[1].legend(
+            loc="upper right",
+            fancybox=True,
+            shadow=True,
+            framealpha=0.95,
+            **legend_kwargs,
+        )
 
     name = "smooth_scaling_collapse.png" if is_smooth else "kinked_scaling_collapse.png"
     fig.tight_layout(pad=1.0, w_pad=1.4)
@@ -371,8 +421,16 @@ def make_hermite() -> None:
     tanh_mask = tanh_coeff > 1e-13
 
     fig, ax = plt.subplots(figsize=(6.2, 3.7))
-    ax.semilogy(n[relu_mask], relu_coeff[relu_mask], "s-", color=COLORS["kink"], label="ReLU")
-    ax.semilogy(n[tanh_mask], tanh_coeff[tanh_mask], "o-", color=COLORS["smooth"], label=r"$\tanh$")
+    ax.semilogy(
+        n[relu_mask], relu_coeff[relu_mask], "s-", color=COLORS["kink"], label="ReLU"
+    )
+    ax.semilogy(
+        n[tanh_mask],
+        tanh_coeff[tanh_mask],
+        "o-",
+        color=COLORS["smooth"],
+        label=r"$\tanh$",
+    )
     ax.set_xlabel("Hermite degree n")
     ax.set_ylabel(r"$|a_n|$")
     ax.set_title("Hermite coefficient decay")
@@ -394,7 +452,12 @@ def make_mlp_overfit() -> None:
     ]
     for ax, (metric, title, ylabel, logy) in zip(axes.ravel(), panels):
         for sched in order:
-            curve_with_band(ax, results[sched][metric], color=SCHEDULE_COLORS[sched], label=_display(sched, theory))
+            curve_with_band(
+                ax,
+                results[sched][metric],
+                color=SCHEDULE_COLORS[sched],
+                label=_display(sched, theory),
+            )
         ax.set_title(title)
         ax.set_ylabel(ylabel)
         if logy:
@@ -421,7 +484,12 @@ def make_mlp_budget() -> None:
     ]
     for ax, (metric, title, ylabel, logy) in zip(axes.ravel(), panels):
         for sched in order:
-            curve_with_band(ax, results[sched][metric], color=SCHEDULE_COLORS[sched], label=_display(sched, theory))
+            curve_with_band(
+                ax,
+                results[sched][metric],
+                color=SCHEDULE_COLORS[sched],
+                label=_display(sched, theory),
+            )
         _panel_label(ax, "abcd"[list(axes.ravel()).index(ax)], title)
         ax.set_ylabel(ylabel)
         if logy:
@@ -472,7 +540,9 @@ def make_width_sweep() -> None:
     for sched in ["reverse_step", "big_step"]:
         means, sems = [], []
         for width in widths:
-            vals = best_per_seed(_entry(all_results, width, sched)) - best_per_seed(_entry(all_results, width, "constant"))
+            vals = best_per_seed(_entry(all_results, width, sched)) - best_per_seed(
+                _entry(all_results, width, "constant")
+            )
             means.append(np.mean(vals))
             sems.append(np.std(vals, ddof=1) / np.sqrt(len(vals)))
         ax.errorbar(
@@ -492,7 +562,9 @@ def make_width_sweep() -> None:
     ax.set_xlabel(r"Hidden width $N$")
     ax.set_ylabel(r"$\Delta$ best test accuracy (%)")
     ax.legend(loc="lower right")
-    save_figure(fig, OUT / "experiments" / "sweeps" / "width_sweep_baseline_advantage.png")
+    save_figure(
+        fig, OUT / "experiments" / "sweeps" / "width_sweep_baseline_advantage.png"
+    )
     plt.close(fig)
 
 
@@ -504,7 +576,9 @@ def make_gelu_sweep() -> None:
     for sched in ["reverse_step", "big_step"]:
         means, sems = [], []
         for h in h_values:
-            vals = best_per_seed(_entry(all_results, h, sched)) - best_per_seed(_entry(all_results, h, "constant"))
+            vals = best_per_seed(_entry(all_results, h, sched)) - best_per_seed(
+                _entry(all_results, h, "constant")
+            )
             means.append(np.mean(vals))
             sems.append(np.std(vals, ddof=1) / np.sqrt(len(vals)))
         ax.errorbar(
@@ -544,7 +618,13 @@ def make_vit_curves(cropped: bool) -> None:
         for sched in order:
             arr = _json_curve_array(results[sched][metric])
             x = np.arange(arr.shape[1])
-            curve_with_band(ax, arr[:, start:], x=x[start:], color=SCHEDULE_COLORS[sched], label=DISPLAY_NAMES[sched])
+            curve_with_band(
+                ax,
+                arr[:, start:],
+                x=x[start:],
+                color=SCHEDULE_COLORS[sched],
+                label=DISPLAY_NAMES[sched],
+            )
         ax.set_title(title)
         ax.set_ylabel(ylabel)
         if logy:
@@ -561,7 +641,11 @@ def make_vit_curves(cropped: bool) -> None:
 
 def make_component_ablations() -> None:
     data = load_json(RESULTS / "transformer" / "ablation_results.json")
-    modes = [("both", "Both (Attn + MLP)"), ("attn_only", "Attention only"), ("mlp_only", "MLP only")]
+    modes = [
+        ("both", "Both (Attn + MLP)"),
+        ("attn_only", "Attention only"),
+        ("mlp_only", "MLP only"),
+    ]
     schedules = ["none", "constant", "reverse_step"]
     fig, axes = plt.subplots(1, 3, figsize=(11, 3.5), sharey=True)
     for ax, (mode, title) in zip(axes, modes):

@@ -50,7 +50,7 @@ export PYTHONUNBUFFERED=1
 export OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-8}"
 
 args=(
-  python experiments/benchmark/run.py run
+  python -m dropout_mft.experiments.benchmark benchmark run
   --run-dir "${RUN_DIR}"
   --stage "${STAGE}"
   --shard-index "${SLURM_ARRAY_TASK_ID}"

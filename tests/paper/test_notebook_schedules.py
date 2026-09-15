@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 NOTEBOOK_ROOT = REPOSITORY_ROOT / "notebooks"
 
@@ -49,9 +48,9 @@ def test_all_notebooks_are_valid_json_and_have_no_local_schedule_implementations
     for path in sorted(NOTEBOOK_ROOT.rglob("*.ipynb")):
         source = _code_source(path)
         for definition in forbidden:
-            assert (
-                definition not in source
-            ), f"{path.relative_to(NOTEBOOK_ROOT)} redefines {definition}"
+            assert definition not in source, (
+                f"{path.relative_to(NOTEBOOK_ROOT)} redefines {definition}"
+            )
 
 
 @pytest.mark.parametrize("relative_path", sorted(SCHEDULE_NOTEBOOKS))

@@ -51,19 +51,26 @@ from dropout_mft.experiments.benchmark.datasets import (
     BenchmarkDataSpec,
     load_benchmark_bundle,
 )
-from dropout_mft.experiments.scale_transfer.protocol import (
-    _provenance,
-    canonical_json,
-    seed_streams,
-)
 from dropout_mft.fields import propagated_field_profile, reference_field_profile
-from dropout_mft.models import MLPConfig, SequenceTransformer, TinyViT, build_mlp, make_optimizer
+from dropout_mft.models import (
+    MLPConfig,
+    SequenceTransformer,
+    TinyViT,
+    build_mlp,
+    make_optimizer,
+)
 from dropout_mft.provenance import provenance_sha256, sha256_file
-from dropout_mft.results import load_npz_result, save_npz_result
-from dropout_mft.schedules import field_damage, schedule_layers
-from dropout_mft.training import BenchmarkDatasetName, DatasetBundle, TrainingConfig, train_model
-from dropout_mft.training import seed_everything
-
+from dropout_mft.provenance import runtime_provenance as _provenance
+from dropout_mft.randomization import canonical_json, seed_streams
+from dropout_mft.results import load_matching_trial, save_npz_result_atomic
+from dropout_mft.schedules import field_damage, named_profile_layers
+from dropout_mft.training import (
+    BenchmarkDatasetName,
+    DatasetBundle,
+    seed_everything,
+    train_model,
+    training_config_from_trial,
+)
 
 # v2 restored the minimum-validation-loss checkpoint before test evaluation.
 # v3 adds an explicit cohort identifier to the immutable trial specification so
@@ -238,28 +245,9 @@ def benchmark_profile_layers(spec: BenchmarkTrialSpec) -> list[float]:
 
     if spec.profile_id in ZERO_DROPOUT_PROFILE_IDS:
         return [0.0] * spec.depth
-    if spec.profile_id == "uniform":
-        values = schedule_layers(
-            "constant", spec.depth, spec.mean_dropout, spec.max_dropout
-        )
-    elif spec.profile_id == "step_early":
-        values = schedule_layers(
-            "reverse_step", spec.depth, spec.mean_dropout, spec.max_dropout
-        )
-    elif spec.profile_id == "big_step":
-        values = schedule_layers(
-            "big_step", spec.depth, spec.mean_dropout, spec.max_dropout
-        )
-    elif spec.profile_id == "linear_early":
-        values = schedule_layers(
-            "reverse_linear", spec.depth, spec.mean_dropout, spec.max_dropout
-        )
-    elif spec.profile_id == "linear_late":
-        values = schedule_layers(
-            "linear", spec.depth, spec.mean_dropout, spec.max_dropout
-        )
-    else:  # pragma: no cover - __post_init__ protects callers
-        raise ValueError(f"Unknown profile: {spec.profile_id!r}")
+    values = named_profile_layers(
+        spec.profile_id, spec.depth, spec.mean_dropout, spec.max_dropout
+    )
 
     # The comparison is only meaningful if every arm spends the same budget.
     if not math.isclose(
@@ -539,29 +527,18 @@ def run_benchmark_trial(
     expected_source_hash = (
         provenance_sha256(source_provenance) if source_provenance is not None else None
     )
-    if output_path.exists() and not force:
-        existing = load_npz_result(output_path)
-        valid_result = (
-            existing.get("schema_version") == BENCHMARK_SCHEMA_VERSION
-            and existing.get("trial", {}).get("trial_id") == spec.trial_id
-            and existing.get("trial", {}).get("config_hash") == spec.config_hash
-            and existing.get("trial", {}).get("status") == "complete"
-            and existing.get("data", {}).get("split_hash") == bundle.split_hash
-            and existing.get("randomization") == randomization
-            and existing.get("provenance", {}).get("source_provenance_sha256")
-            == expected_source_hash
-        )
-        if valid_result and checkpoint_path is not None:
-            checkpoint = existing.get("checkpoint", {})
-            valid_result = (
-                checkpoint.get("saved") is True
-                and checkpoint.get("format") == "torch_state_dict_v1"
-                and checkpoint_path.is_file()
-                and checkpoint.get("sha256") == sha256_file(checkpoint_path)
-            )
-        if valid_result:
-            return existing
-        raise ValueError(f"Existing trial is corrupt or mismatched: {output_path}")
+    existing = load_matching_trial(
+        output_path,
+        spec,
+        bundle,
+        randomization,
+        schema_version=BENCHMARK_SCHEMA_VERSION,
+        source_hash=expected_source_hash,
+        force=force,
+        checkpoint_path=checkpoint_path,
+    )
+    if existing is not None:
+        return existing
     if bundle.dataset != spec.dataset:
         raise ValueError("Dataset bundle does not match trial specification")
 
@@ -582,22 +559,11 @@ def run_benchmark_trial(
             weight_decay=spec.weight_decay,
         )
 
-    training_config = TrainingConfig(
-        epochs=spec.epochs,
-        batch_size=spec.batch_size,
-        learning_rate=spec.learning_rate,
-        lr_floor_ratio=spec.lr_floor_ratio,
-        weight_decay=spec.weight_decay,
-        gradient_clip_norm=spec.gradient_clip_norm,
-        seed=randomization["minibatch_seed"],
-        stochastic_seed=randomization["dropout_seed"],
-        evaluate_test=spec.evaluate_test,
-        # Selection reads the minimum-validation-loss epoch, so the test set has
-        # to be read at that same epoch.  These tasks are deliberately sized to
-        # overfit, and how far a run degrades after its own selection point
-        # differs by dropout profile, which is the effect under test.
-        restore_best_validation=True,
+    training_config = training_config_from_trial(
+        spec,
+        randomization,
         device=device,
+        restore_best_validation=True,
     )
     start = time.perf_counter()
     trained = train_model(
@@ -723,10 +689,7 @@ def run_benchmark_trial(
     if trained:
         result["training"] = trained
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = output_path.with_suffix(".tmp.npz")
-    save_npz_result(temporary, result)
-    os.replace(temporary, output_path)
+    save_npz_result_atomic(output_path, result)
     return result
 
 

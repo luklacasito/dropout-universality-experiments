@@ -16,3 +16,12 @@ paper/*.pdf
 results/**/*.pkl
 *.log
 *.tmp
+
+# Local experiment output and packaging artifacts (paper results stay tracked).
+/runs/
+/build/
+/dist/
+.venv-*/
+slurm-*.out
+.coverage
+htmlcov/

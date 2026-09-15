@@ -61,7 +61,7 @@ than quadratic.
 Create a distinct source snapshot and plan containing only this profile:
 
 ```bash
-export BIG_STEP_SNAPSHOT=/Users/mac/Documents/icml/dropout-legacy-bigstep-source-snapshot-20260811
+export BIG_STEP_SNAPSHOT="$PWD/../snapshots/legacy-bigstep-new-cohort"
 python experiments/legacy/run.py snapshot-source \
   --output "$BIG_STEP_SNAPSHOT" \
   --slurm-script experiments/legacy/slurm/run_h100.sbatch \
@@ -77,7 +77,7 @@ never be silently merged into the cap-0.20 cohort.
 Run from the repository root:
 
 ```bash
-export LEGACY_SNAPSHOT=/Users/mac/Documents/icml/dropout-legacy-source-snapshot-20260811
+export LEGACY_SNAPSHOT="$PWD/../snapshots/legacy-new-cohort"
 export PYTHONPATH="$PWD/src${PYTHONPATH:+:$PYTHONPATH}"
 python experiments/legacy/run.py snapshot-source \
   --output "$LEGACY_SNAPSHOT" \

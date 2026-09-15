@@ -1,13 +1,27 @@
 # Multi-Modality Benchmark Suite
 
+Use one command surface for all studies:
+
+```bash
+python -m dropout_mft.experiments.benchmark STUDY COMMAND --help
+```
+
+`STUDY` is `benchmark`, `zero_decay`, `vision_zero_decay`, `data_regimes`,
+`vision`, `sidecar`, or `jannis_100`. Each study keeps its definitions, planning,
+and custom analysis together under `src/dropout_mft/experiments/benchmark/`.
+Tiny ImageNet zero-decay is a preset of `zero_decay.py`. Execution and common
+selection/aggregation use the shared runner; sidecar and Jannis retain their
+specific analysis requirements. All commands and Slurm launchers below use the
+unified entry point; the obsolete Python launcher wrappers have been removed.
+
 The published results establish uniform-versus-front-loaded dropout at fixed
 budget on CIFAR-10/100 with an MLP and a ViT. This suite runs the same
 comparison on five further tasks spanning finance, vision, text, audio, and
 tabular data, for both an MLP and a transformer, at width 256 and depth 6.
 
 This is an **additive** cohort. It does not modify `scale_transfer.TrialSpec`,
-any published manifest, or any file under `results/`, so every camera-ready
-figure still reproduces byte-for-byte.
+any published manifest, or any file under `results/`. The saved inputs to the
+camera-ready figures remain unchanged.
 
 ## Tasks
 
@@ -121,8 +135,8 @@ export VENV_DIR=$PROJECT/venvs/dropout311
 export DATA_ROOT=$PROJECT/data
 
 # Local sanity check, no data and no GPU needed.
-python experiments/benchmark/run.py smoke
-python experiments/benchmark/run.py cost
+python -m dropout_mft.experiments.benchmark benchmark smoke
+python -m dropout_mft.experiments.benchmark benchmark cost
 
 # One CPU job to build all five caches.
 sbatch -A YOUR_ALLOCATION --export=ALL,PROJECT_DIR=$PROJECT_DIR,\
@@ -130,7 +144,7 @@ DATA_ROOT=$DATA_ROOT,VENV_DIR=$VENV_DIR \
   experiments/benchmark/slurm/prepare_data.sbatch
 
 # Check every cache loads before spending any GPU time on it.
-python experiments/benchmark/run.py verify-data --data-root $DATA_ROOT
+python -m dropout_mft.experiments.benchmark benchmark verify-data --data-root $DATA_ROOT
 
 # Then the whole three-stage chain, with Slurm dependencies between stages.
 ./experiments/benchmark/slurm/submit_suite.sh -A YOUR_ALLOCATION
@@ -153,8 +167,8 @@ PROJECT_DIR=$PROJECT_DIR,RUN_DIR=$RUN_DIR,VENV_DIR=$VENV_DIR,DATA_ROOT=$DATA_ROO
 Progress and results:
 
 ```bash
-python experiments/benchmark/run.py status --run-dir $RUN_DIR
-python experiments/benchmark/run.py aggregate --run-dir $RUN_DIR
+python -m dropout_mft.experiments.benchmark benchmark status --run-dir $RUN_DIR
+python -m dropout_mft.experiments.benchmark benchmark aggregate --run-dir $RUN_DIR
 ```
 
 Every trial is content-addressed by its spec hash and written atomically, so a

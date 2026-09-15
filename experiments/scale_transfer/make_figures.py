@@ -52,7 +52,6 @@ from dropout_mft.plotting import save_figure
 from dropout_mft.results import load_npz_result
 from dropout_mft.style import COLORS, apply_paper_style
 
-
 REPO_ROOT = project_root()
 SCHEMA_VERSION = 2
 DEFAULT_RUN_DIR = REPO_ROOT / "results" / "scale_transfer"
@@ -1643,9 +1642,9 @@ def profile_contrast_gates(trials: Sequence[dict]) -> dict:
                 candidate_profile=candidate,
                 reference_profile=reference,
             )
-            output[role]["by_parameterization"][
-                parameterization
-            ] = profile_transfer_claim_gate(records, harm_margin=PROFILE_HARM_MARGIN)
+            output[role]["by_parameterization"][parameterization] = (
+                profile_transfer_claim_gate(records, harm_margin=PROFILE_HARM_MARGIN)
+            )
 
         records = _paired_width_records(
             trials,

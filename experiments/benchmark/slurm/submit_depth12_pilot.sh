@@ -48,7 +48,7 @@ submit_array() {
     "${HERE}/run_h100.sbatch"
 }
 
-"${VENV_DIR}/bin/python" experiments/benchmark/run.py plan \
+"${VENV_DIR}/bin/python" -m dropout_mft.experiments.benchmark benchmark plan \
   --run-dir "${RUN_DIR}" --stage lr_search --depth 12 \
   --dataset fi2010 --dataset openml_jannis
 
@@ -56,9 +56,9 @@ lr_job=$(submit_array lr_search "${LR_SHARDS}" "")
 echo "depth12 lr_search      ${lr_job}"
 
 select_wrap="source ${VENV_DIR}/bin/activate && cd ${PROJECT_DIR} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run.py select \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark benchmark select \
 --run-dir ${RUN_DIR} --stage lr_search && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run.py plan \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark benchmark plan \
 --run-dir ${RUN_DIR} --stage confirm --depth 12 --selection-stage lr_search \
 --dataset fi2010 --dataset openml_jannis"
 
@@ -75,7 +75,7 @@ confirm_job=$(submit_array confirm "${CONFIRM_SHARDS}" "${select_job}")
 echo "depth12 confirm        ${confirm_job}"
 
 aggregate_wrap="source ${VENV_DIR}/bin/activate && cd ${PROJECT_DIR} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run.py aggregate \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark benchmark aggregate \
 --run-dir ${RUN_DIR}"
 
 aggregate_job=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
@@ -89,5 +89,5 @@ echo "aggregate              ${aggregate_job}"
 
 echo
 echo "Track with: squeue -u \$USER"
-echo "Progress:   python experiments/benchmark/run.py status --run-dir ${RUN_DIR}"
+echo "Progress:   python -m dropout_mft.experiments.benchmark benchmark status --run-dir ${RUN_DIR}"
 echo "W&B spool:  ${RUN_DIR}/wandb (sync after the arrays finish)"

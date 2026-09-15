@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import platform
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -22,10 +21,16 @@ from dropout_mft.fields import (
 )
 from dropout_mft.models import MLPConfig, TinyViT, build_mlp, make_optimizer
 from dropout_mft.provenance import provenance_sha256
-from dropout_mft.results import load_npz_result, save_npz_result
-from dropout_mft.schedules import field_damage, power_profile_layers, schedule_layers
-from dropout_mft.training import DatasetBundle, TrainingConfig, seed_everything, train_model
-
+from dropout_mft.provenance import runtime_provenance as _provenance
+from dropout_mft.randomization import canonical_json, seed_streams
+from dropout_mft.results import load_matching_trial, save_npz_result_atomic
+from dropout_mft.schedules import field_damage, named_profile_layers, schedule_layers
+from dropout_mft.training import (
+    DatasetBundle,
+    seed_everything,
+    train_model,
+    training_config_from_trial,
+)
 
 SCHEMA_VERSION = 2
 PROFILE_IDS = (
@@ -58,9 +63,9 @@ class TrialSpec:
     width: int
     learning_rate: float
     seed: int
-    budget_space: Literal[
-        "dropout_probability", "reference_field"
-    ] = "dropout_probability"
+    budget_space: Literal["dropout_probability", "reference_field"] = (
+        "dropout_probability"
+    )
     zero_readout: bool = False
     evaluate_test: bool = True
     epochs: int = 75
@@ -126,41 +131,6 @@ class TrialSpec:
         return hashlib.sha256(canonical_json(payload).encode()).hexdigest()[:20]
 
 
-def canonical_json(value) -> str:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
-
-
-def _derived_seed(stream: str, payload: object) -> int:
-    digest = hashlib.sha256(f"{stream}\0{canonical_json(payload)}".encode()).digest()
-    return int.from_bytes(digest[:4], "big")
-
-
-def _profile_pair_family(profile_id: str) -> str:
-    for suffix in ("_early", "_late"):
-        if profile_id.endswith(suffix):
-            return profile_id[: -len(suffix)]
-    return profile_id
-
-
-def seed_streams(spec: TrialSpec) -> dict:
-    """Return independent seeds, with dropout CRNs shared by reversal pairs."""
-
-    base = {"base_seed": spec.seed}
-    pair_payload = asdict(spec)
-    pair_payload["profile_id"] = _profile_pair_family(spec.profile_id)
-    pair_key = hashlib.sha256(canonical_json(pair_payload).encode()).hexdigest()[:20]
-    return {
-        "scheme": "sha256_named_streams_v1",
-        "base_seed": spec.seed,
-        "initialization_seed": _derived_seed("initialization", base),
-        "minibatch_seed": _derived_seed("minibatch", base),
-        "dropout_seed": _derived_seed(
-            "dropout_common_random_numbers", {"pair_key": pair_key}
-        ),
-        "dropout_crn_group": pair_key,
-    }
-
-
 def profile_layers(spec: TrialSpec) -> list[float]:
     profile = spec.profile_id
     if profile == "none":
@@ -203,12 +173,12 @@ def profile_layers(spec: TrialSpec) -> list[float]:
             sigma_w_sq=spec.sigma_w_sq,
             sigma_b_sq=spec.sigma_b_sq,
         )
-    return power_profile_layers(
+    return named_profile_layers(
+        spec.profile_id,
         spec.depth,
         spec.mean_dropout,
-        power,
-        orientation=orientation,
-        h_max=spec.max_dropout,
+        spec.max_dropout,
+        sampling="cell_centers",
     )
 
 
@@ -537,62 +507,6 @@ def read_manifest_provenance(path: str | Path) -> dict:
     return records[0]
 
 
-def _git_commit() -> str:
-    """Read HEAD without forking after PyTorch has started worker threads."""
-
-    git_entry = Path(__file__).resolve().parents[2] / ".git"
-    try:
-        if git_entry.is_file():
-            pointer = git_entry.read_text().strip()
-            if not pointer.startswith("gitdir:"):
-                return "unknown"
-            git_dir = (git_entry.parent / pointer.split(":", 1)[1].strip()).resolve()
-        else:
-            git_dir = git_entry
-        head = (git_dir / "HEAD").read_text().strip()
-        if not head.startswith("ref:"):
-            return head
-        reference = head.split(":", 1)[1].strip()
-        loose_ref = git_dir / reference
-        if loose_ref.exists():
-            return loose_ref.read_text().strip()
-        for line in (git_dir / "packed-refs").read_text().splitlines():
-            if line and not line.startswith(("#", "^")):
-                commit, name = line.split(" ", 1)
-                if name == reference:
-                    return commit
-    except (OSError, ValueError):
-        pass
-    return "unknown"
-
-
-def _provenance(device: str, source: dict | None) -> dict:
-    slurm_keys = (
-        "SLURM_JOB_ID",
-        "SLURM_ARRAY_JOB_ID",
-        "SLURM_ARRAY_TASK_ID",
-        "SLURM_CLUSTER_NAME",
-        "SLURMD_NODENAME",
-    )
-    runtime = {
-        "git_commit": _git_commit(),
-        "python_version": platform.python_version(),
-        "torch_version": torch.__version__,
-        "numpy_version": np.__version__,
-        "device": device,
-        "slurm": {
-            key.lower(): os.environ[key] for key in slurm_keys if key in os.environ
-        },
-    }
-    return {
-        "source": source,
-        "source_provenance_sha256": (
-            provenance_sha256(source) if source is not None else None
-        ),
-        "runtime": runtime,
-    }
-
-
 def run_trial(
     spec: TrialSpec,
     bundle: DatasetBundle,
@@ -609,20 +523,17 @@ def run_trial(
     expected_source_hash = (
         provenance_sha256(source_provenance) if source_provenance is not None else None
     )
-    if output_path.exists() and not force:
-        existing = load_npz_result(output_path)
-        if (
-            existing.get("schema_version") == SCHEMA_VERSION
-            and existing.get("trial", {}).get("trial_id") == spec.trial_id
-            and existing.get("trial", {}).get("config_hash") == spec.config_hash
-            and existing.get("trial", {}).get("status") == "complete"
-            and existing.get("data", {}).get("split_hash") == bundle.split_hash
-            and existing.get("randomization") == randomization
-            and existing.get("provenance", {}).get("source_provenance_sha256")
-            == expected_source_hash
-        ):
-            return existing
-        raise ValueError(f"Existing trial is corrupt or mismatched: {output_path}")
+    existing = load_matching_trial(
+        output_path,
+        spec,
+        bundle,
+        randomization,
+        schema_version=SCHEMA_VERSION,
+        source_hash=expected_source_hash,
+        force=force,
+    )
+    if existing is not None:
+        return existing
     if bundle.dataset != spec.dataset:
         raise ValueError("Dataset bundle does not match trial specification")
 
@@ -661,19 +572,11 @@ def run_trial(
             weight_decay=spec.weight_decay,
         )
 
-    training_config = TrainingConfig(
-        epochs=spec.epochs,
-        batch_size=spec.batch_size,
-        learning_rate=spec.learning_rate,
-        lr_floor_ratio=spec.lr_floor_ratio,
-        weight_decay=spec.weight_decay,
-        gradient_clip_norm=spec.gradient_clip_norm,
-        seed=randomization["minibatch_seed"],
-        # Exact early/late reversal pairs share this dropout stream. Model
-        # initialization and minibatch order use separate named streams above.
-        stochastic_seed=randomization["dropout_seed"],
-        evaluate_test=spec.evaluate_test,
+    training_config = training_config_from_trial(
+        spec,
+        randomization,
         device=device,
+        restore_best_validation=False,
     )
     start = time.perf_counter()
     trained = train_model(model, optimizer, bundle, training_config)
@@ -727,8 +630,5 @@ def run_trial(
     if trained:
         result["training"] = trained
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = output_path.with_suffix(".tmp.npz")
-    save_npz_result(temporary, result)
-    os.replace(temporary, output_path)
+    save_npz_result_atomic(output_path, result)
     return result

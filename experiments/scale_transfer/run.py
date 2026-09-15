@@ -13,10 +13,8 @@ from pathlib import Path
 
 import numpy as np
 
-from dropout_mft.experiments.scale_transfer.analysis import select_proxy_learning_rates
 from dropout_mft.diagnostics import mup_coordinate_check
-from dropout_mft.models import MLPConfig, build_mlp, make_optimizer
-from dropout_mft.results import load_npz_result, save_npz_result
+from dropout_mft.experiments.scale_transfer.analysis import select_proxy_learning_rates
 from dropout_mft.experiments.scale_transfer.protocol import (
     SCHEMA_VERSION,
     TrialSpec,
@@ -34,12 +32,14 @@ from dropout_mft.experiments.scale_transfer.protocol import (
     vit_confirmation_specs,
     write_manifest,
 )
+from dropout_mft.models import MLPConfig, build_mlp, make_optimizer
 from dropout_mft.provenance import (
     freeze_provenance,
     freeze_source_snapshot,
     load_frozen_provenance,
     provenance_sha256,
 )
+from dropout_mft.results import load_npz_result, save_npz_result
 from dropout_mft.training import (
     TrainingConfig,
     load_cifar_bundle,
@@ -47,7 +47,6 @@ from dropout_mft.training import (
     synthetic_bundle,
     train_model,
 )
-
 
 PRIMARY_PHASE_BUILDERS = {
     "profile_pilot": profile_pilot_specs,

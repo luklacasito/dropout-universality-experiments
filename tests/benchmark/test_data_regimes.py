@@ -5,9 +5,9 @@ from __future__ import annotations
 import pytest
 
 from dropout_mft.experiments.benchmark.data_regimes import (
-    DATA_REGIMES,
     DATA_REGIME_IDS,
     DATA_REGIME_MODEL_KINDS,
+    DATA_REGIMES,
     data_regime,
     data_regime_budget_search_specs,
     data_regime_confirm_specs,

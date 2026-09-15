@@ -42,7 +42,7 @@ for dataset in fi2010 openml_jannis; do
 done
 
 mkdir -p "${RUN_DIR}/logs"
-python experiments/benchmark/run_transformer_sidecar.py plan \
+python -m dropout_mft.experiments.benchmark sidecar plan \
   --run-dir "${RUN_DIR}" --stage lr_search --depth 12
 
 common="PROJECT_DIR=${PROJECT_DIR},RUN_DIR=${RUN_DIR},VENV_DIR=${VENV_DIR}"
@@ -63,9 +63,9 @@ lr_job=$(submit_array lr_search "${LR_SHARDS}" "")
 echo "sidecar lr_search      ${lr_job}"
 
 select_wrap="source ${VENV_DIR}/bin/activate && cd ${PROJECT_DIR} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run_transformer_sidecar.py select \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark sidecar select \
 --run-dir ${RUN_DIR} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run_transformer_sidecar.py plan \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark sidecar plan \
 --run-dir ${RUN_DIR} --stage confirm --depth 12"
 
 select_job=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
@@ -85,7 +85,7 @@ if [[ -n "${BASELINE_DEPENDENCY_JOB}" ]]; then
   aggregate_dependency="${aggregate_dependency}:${BASELINE_DEPENDENCY_JOB}"
 fi
 aggregate_wrap="source ${VENV_DIR}/bin/activate && cd ${PROJECT_DIR} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run_transformer_sidecar.py aggregate \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark sidecar aggregate \
 --run-dir ${RUN_DIR} --baseline-run-dir ${BASELINE_RUN_DIR}"
 
 aggregate_job=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
@@ -98,7 +98,7 @@ aggregate_job=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
 echo "aggregate              ${aggregate_job}"
 
 echo
-python experiments/benchmark/run_transformer_sidecar.py cost
+python -m dropout_mft.experiments.benchmark sidecar cost
 echo "Track with: squeue -u \$USER"
-echo "Progress:   python experiments/benchmark/run.py status --run-dir ${RUN_DIR}"
+echo "Progress:   python -m dropout_mft.experiments.benchmark benchmark status --run-dir ${RUN_DIR}"
 echo "W&B spool:  ${RUN_DIR}/wandb"

@@ -32,7 +32,6 @@ from torch.utils.data import TensorDataset
 
 from dropout_mft.training import BenchmarkDatasetName, DatasetBundle
 
-
 BENCHMARK_SPLIT_PROTOCOL = "benchmark_stratified_split_default_rng_v1"
 NESTED_TRAIN_SPLIT_PROTOCOL = "benchmark_stratified_nested_train_shared_holdout_v1"
 # v2 records that the underlying series comes from a single cumulative fold and

@@ -14,7 +14,6 @@ from typing import Literal
 import torch
 from torch import nn
 
-
 ActivationName = Literal["relu", "gelu"]
 Parameterization = Literal["sp", "mup"]
 

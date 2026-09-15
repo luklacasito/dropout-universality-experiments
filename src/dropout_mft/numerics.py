@@ -24,7 +24,9 @@ def solve_bracketed(
         return float(lo)
     if f_hi == 0:
         return float(hi)
-    result = root_scalar(fn, bracket=(lo, hi), method="brentq", xtol=xtol, rtol=rtol, maxiter=maxiter)
+    result = root_scalar(
+        fn, bracket=(lo, hi), method="brentq", xtol=xtol, rtol=rtol, maxiter=maxiter
+    )
     if not result.converged:
         raise RuntimeError(f"root_scalar did not converge on bracket {bracket}")
     return float(result.root)

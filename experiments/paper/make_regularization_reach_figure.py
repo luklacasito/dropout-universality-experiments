@@ -85,7 +85,9 @@ def make_figure() -> Path:
     ax2.axhline(1.0, color=COLORS["neutral"], linewidth=1.0, linestyle=":")
     ax2.set_xscale("log")
     ax2.set_xlabel(r"$\tau \equiv L/\xi_c$")
-    ax2.set_ylabel(r"$\mathcal{R}(\tau, f) = \mathcal{V}_{\rm step}/\mathcal{V}_{\rm const}$")
+    ax2.set_ylabel(
+        r"$\mathcal{R}(\tau, f) = \mathcal{V}_{\rm step}/\mathcal{V}_{\rm const}$"
+    )
     ax2.set_title("(b) Front-loaded vs. constant, at fixed budget")
     ax2.legend(loc="upper right", fontsize=8.5)
 

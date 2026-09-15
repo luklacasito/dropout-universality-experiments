@@ -9,9 +9,15 @@ the nested-training/shared-heldout split protocol.
 
 from __future__ import annotations
 
+import argparse
 from dataclasses import dataclass, replace
 
 from dropout_mft.experiments.benchmark.protocol import BenchmarkTrialSpec, ModelKind
+from dropout_mft.experiments.benchmark.workflow import (
+    plan_selected_stage,
+    save_plan,
+    stage_selections,
+)
 from dropout_mft.experiments.benchmark.zero_decay import (
     ZERO_DECAY_DEPTH,
     ZERO_DECAY_DROPOUT_PROFILE_IDS,
@@ -22,7 +28,6 @@ from dropout_mft.experiments.benchmark.zero_decay import (
     zero_decay_lr_search_specs,
 )
 from dropout_mft.training import BenchmarkDatasetName
-
 
 DATA_REGIME_COHORT_PREFIX = "data-regime-scaling-v1"
 DATA_REGIME_DEPTH = ZERO_DECAY_DEPTH
@@ -206,3 +211,57 @@ def data_regime_trial_count(regime_id: str) -> dict[str, int]:
         )
     counts["total"] = sum(counts.values())
     return counts
+
+
+def command_plan(args: argparse.Namespace) -> None:
+    regime = data_regime(args.regime)
+    specs = plan_selected_stage(
+        args.stage,
+        ((regime.dataset, m) for m in DATA_REGIME_MODEL_KINDS),
+        stage_selections(args.run_dir, args.stage),
+        lr_search=lambda d, m: data_regime_lr_search_specs(args.regime, m),
+        budget_search=lambda d, m, rates: data_regime_budget_search_specs(
+            args.regime, m, rates
+        ),
+        confirm=lambda d, m, budgets, rates: data_regime_confirm_specs(
+            args.regime, m, budgets, rates
+        ),
+    )
+    save_plan(args.run_dir, args.stage, specs, description=f"regime={args.regime} ")
+
+
+def command_cost(args: argparse.Namespace) -> None:
+    regime = data_regime(args.regime)
+    print(
+        f"regime={regime.regime_id} dataset={regime.dataset} "
+        f"train={regime.train_size} validation={regime.validation_size} "
+        f"test={regime.test_size}"
+    )
+    print(
+        f"models=mlp,transformer depth={DATA_REGIME_DEPTH} "
+        f"epochs={regime.epochs} weight_decay=0"
+    )
+    print("dropout_grid=0.05,0.10,0.15,0.20")
+    for stage, count in data_regime_trial_count(args.regime).items():
+        print(f"{stage:14s} {count:5d} trials")
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    commands = parser.add_subparsers(dest="command", required=True)
+    plan = commands.add_parser("plan")
+    plan.add_argument("--run-dir", required=True)
+    plan.add_argument("--regime", choices=DATA_REGIME_IDS, required=True)
+    plan.add_argument(
+        "--stage", choices=("lr_search", "budget_search", "confirm"), required=True
+    )
+    plan.set_defaults(func=command_plan)
+    cost = commands.add_parser("cost")
+    cost.add_argument("--regime", choices=DATA_REGIME_IDS, required=True)
+    cost.set_defaults(func=command_cost)
+    return parser
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = build_parser().parse_args(argv)
+    args.func(args)

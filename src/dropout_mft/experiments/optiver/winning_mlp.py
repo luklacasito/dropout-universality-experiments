@@ -17,9 +17,9 @@ import hashlib
 import json
 import math
 import random
+from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from collections import defaultdict
 from typing import Literal
 
 import numpy as np
@@ -27,8 +27,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
-from dropout_mft.schedules import schedule_layers
-
+from dropout_mft.schedules import comparison_profile_cap, named_profile_layers
 
 SHALLOW_PROFILE_IDS = ("none", "uniform", "early", "late")
 DEEP_PROFILE_IDS = (
@@ -91,17 +90,13 @@ def profile_layers(
     # cap-exempt and spends the same mean budget in the first third; linear
     # profiles only need a 2p cap.  Using one permissive cap for every profile
     # would make depth-12 step-early collapse onto big-step at p=.10.
-    if profile_id == "big_step":
-        cap = max(0.30, 3.0 * mean_dropout)
-    elif profile_id in {"linear_early", "linear_late"}:
-        cap = max(0.20, 2.0 * mean_dropout)
-    else:
-        cap = 0.20
+    profile_id = {"early": "step_early", "late": "step_late"}.get(
+        profile_id, profile_id
+    )
+    cap = comparison_profile_cap(profile_id, mean_dropout)
     return tuple(
         float(value)
-        for value in schedule_layers(
-            PROFILE_TO_SCHEDULE[profile_id], depth, mean_dropout, h_max=cap
-        )
+        for value in named_profile_layers(profile_id, depth, mean_dropout, cap)
     )
 
 

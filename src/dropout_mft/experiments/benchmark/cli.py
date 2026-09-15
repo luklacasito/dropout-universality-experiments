@@ -25,14 +25,16 @@ from __future__ import annotations
 import argparse
 import gc
 import os
-import sys
 from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
-
-from dropout_mft.experiments.benchmark.protocol import (  # noqa: E402
+from dropout_mft.experiments.benchmark.datasets import (
+    BENCHMARK_NAMES,
+    BENCHMARK_SPECS,
+    load_benchmark_bundle,
+)
+from dropout_mft.experiments.benchmark.protocol import (
     BENCHMARK_PROFILE_IDS,
     CONTROL_PROFILE_ID,
     STAGES,
@@ -44,25 +46,26 @@ from dropout_mft.experiments.benchmark.protocol import (  # noqa: E402
     read_benchmark_manifest,
     run_benchmark_trial,
     shard,
-    trial_output_path,
     trial_checkpoint_path,
+    trial_output_path,
 )
-from dropout_mft.experiments.benchmark.datasets import (  # noqa: E402
-    BENCHMARK_NAMES,
-    BENCHMARK_SPECS,
-    load_benchmark_bundle,
-)
-from dropout_mft.provenance import provenance_sha256  # noqa: E402
-from dropout_mft.results import load_npz_result  # noqa: E402
-from dropout_mft.experiments.benchmark.workflow import (  # noqa: E402
-    load_selection as _load_selection,
+from dropout_mft.experiments.benchmark.workflow import (
+    collect_records,
+    index_records,
     manifest_path,
-    paired_percentile_interval as _paired_bootstrap,
+    save_plan,
+    select_candidates,
     selection_path,
-    write_immutable_manifest,
     write_json_atomic,
 )
-from dropout_mft.wandb_tracking import (  # noqa: E402
+from dropout_mft.experiments.benchmark.workflow import (
+    load_selection as _load_selection,
+)
+from dropout_mft.experiments.benchmark.workflow import (
+    paired_percentile_interval as _paired_bootstrap,
+)
+from dropout_mft.training import DatasetBundle
+from dropout_mft.wandb_tracking import (
     WandbOptions,
     benchmark_wandb_run,
     finish_benchmark_wandb_run,
@@ -121,11 +124,7 @@ def command_plan(args: argparse.Namespace) -> None:
                 confirm_specs(dataset, model_kind, selection[cell], depth=args.depth)
             )
 
-    path, provenance = write_immutable_manifest(run_dir, args.stage, specs)
-    cells = sorted({spec.cell for spec in specs})
-    print(f"stage={args.stage} trials={len(specs)} cells={len(cells)}")
-    print(f"manifest={path}")
-    print(f"provenance_sha256={provenance_sha256(provenance)}")
+    save_plan(run_dir, args.stage, specs)
 
 
 def command_run(args: argparse.Namespace) -> None:
@@ -159,49 +158,45 @@ def command_run(args: argparse.Namespace) -> None:
         print(f"shard {args.shard_index}/{args.num_shards} has no work")
         return
 
-    # One bundle load per (dataset, view) rather than per trial: the raw arrays
-    # dominate memory and are identical across every trial in the group.
-    bundles: dict[tuple[str, str], object] = {}
+    # Reuse consecutive trials' data, retaining only one bundle in memory.
+    # Manifests group trials by dataset and view; each bundle can be large.
+    bundle_key: tuple[str, str] | None = None
+    bundle: DatasetBundle | None = None
     completed = 0
     for index, spec in enumerate(assigned, start=1):
         key = (spec.dataset, spec.data_view)
-        if key not in bundles:
-            bundles.clear()
-            bundles[key] = bundle_for(spec, root=args.data_root)
+        if key != bundle_key:
+            bundle = None  # Release the previous arrays before loading new ones.
+            bundle = bundle_for(spec, root=args.data_root)
+            bundle_key = key
+        assert bundle is not None
         output_path = trial_output_path(run_dir, spec)
         checkpoint_path = (
             trial_checkpoint_path(run_dir, spec) if args.save_best_checkpoint else None
         )
-        wandb_status = "disabled"
-        if wandb_options is None or tracking_is_complete(wandb_options, spec.trial_id):
-            result = run_benchmark_trial(
+
+        def execute():
+            return run_benchmark_trial(
                 spec,
-                bundles[key],
+                bundle,
                 output_path,
                 device=args.device,
                 force=args.force,
                 source_provenance=None,
                 checkpoint_path=checkpoint_path,
             )
+
+        wandb_status = "disabled"
+        if wandb_options is None or tracking_is_complete(wandb_options, spec.trial_id):
+            result = execute()
             if wandb_options is not None:
                 wandb_status = "already-tracked"
         else:
-            # Starting W&B before training captures GPU/CPU system metrics.  If
-            # the NPZ already exists (for example from a pre-W&B run), this
-            # same path backfills its saved curves and artifact exactly once.
-            with benchmark_wandb_run(wandb_options, spec, bundles[key]) as (
+            with benchmark_wandb_run(wandb_options, spec, bundle) as (
                 wandb_run,
                 wandb_module,
             ):
-                result = run_benchmark_trial(
-                    spec,
-                    bundles[key],
-                    output_path,
-                    device=args.device,
-                    force=args.force,
-                    source_provenance=None,
-                    checkpoint_path=checkpoint_path,
-                )
+                result = execute()
                 log_benchmark_wandb_result(wandb_run, wandb_module, result, output_path)
                 finish_benchmark_wandb_run(wandb_run, wandb_options, spec.trial_id)
             wandb_status = f"tracked-{wandb_options.mode}"
@@ -219,45 +214,7 @@ def command_run(args: argparse.Namespace) -> None:
 
 
 def _collect(run_dir: Path, stage: str) -> list[dict]:
-    path = manifest_path(run_dir, stage)
-    if not path.exists():
-        raise SystemExit(f"Missing manifest {path}")
-    records: list[dict] = []
-    missing = 0
-    for spec in read_benchmark_manifest(path):
-        output_path = trial_output_path(run_dir, spec)
-        if not output_path.exists():
-            missing += 1
-            continue
-        result = load_npz_result(output_path)
-        records.append(
-            {
-                "cell": spec.cell,
-                "dataset": spec.dataset,
-                "model_kind": spec.model_kind,
-                "profile_id": spec.profile_id,
-                "learning_rate": spec.learning_rate,
-                "mean_dropout": spec.mean_dropout,
-                "seed": spec.seed,
-                "validation_loss": float(result["selection"]["validation_loss"]),
-                "validation_accuracy": float(
-                    result["selection"]["validation_accuracy"]
-                ),
-                "test_loss": result["test"]["loss"],
-                "test_accuracy": result["test"]["accuracy"],
-                "final_epoch_test_loss": result["test"]
-                .get("fixed_final_epoch", {})
-                .get("loss"),
-                "final_epoch_test_accuracy": result["test"]
-                .get("fixed_final_epoch", {})
-                .get("accuracy"),
-            }
-        )
-    if missing:
-        print(f"warning: {missing} trials of stage {stage} are not finished yet")
-    if not records:
-        raise SystemExit(f"No completed trials found for stage {stage}")
-    return records
+    return collect_records(run_dir, stage)
 
 
 def command_select(args: argparse.Namespace) -> None:
@@ -265,39 +222,13 @@ def command_select(args: argparse.Namespace) -> None:
 
     run_dir = Path(args.run_dir)
     records = _collect(run_dir, args.stage)
-    grouped: dict[str, dict[str, list[dict]]] = {}
-    for record in records:
-        grouped.setdefault(record["cell"], {}).setdefault(
-            record["profile_id"], []
-        ).append(record)
-
-    selection: dict[str, dict] = {}
-    for cell, profiles in sorted(grouped.items()):
-        selection[cell] = {}
-        for profile_id, rows in sorted(profiles.items()):
-            if profile_id == CONTROL_PROFILE_ID:
-                continue
-            # Average across seeds so a single lucky draw cannot win the grid.
-            keys: dict[tuple[float, float], list[float]] = {}
-            for row in rows:
-                keys.setdefault((row["learning_rate"], row["mean_dropout"]), []).append(
-                    row["validation_loss"]
-                )
-            scored = [
-                (float(np.mean(losses)), learning_rate, mean_dropout, len(losses))
-                for (learning_rate, mean_dropout), losses in keys.items()
-            ]
-            score, learning_rate, mean_dropout, seeds = min(scored)
-            selection[cell][profile_id] = {
-                "learning_rate": learning_rate,
-                "mean_dropout": mean_dropout,
-                "validation_loss": score,
-                "seeds": seeds,
-                "criterion": "mean_validation_loss_over_seeds_v1",
-            }
+    selection = select_candidates(records, excluded_profiles=(CONTROL_PROFILE_ID,))
+    for cell, profiles in selection.items():
+        for profile_id, choice in profiles.items():
             print(
-                f"{cell:34s} {profile_id:12s} lr={learning_rate:.2e} "
-                f"p={mean_dropout:.2f} val_loss={score:.4f} (n={seeds})"
+                f"{cell:34s} {profile_id:12s} lr={choice['learning_rate']:.2e} "
+                f"p={choice['mean_dropout']:.2f} val_loss={choice['validation_loss']:.4f} "
+                f"(n={choice['seeds']})"
             )
 
     path = selection_path(run_dir, args.stage)
@@ -310,11 +241,7 @@ def command_aggregate(args: argparse.Namespace) -> None:
 
     run_dir = Path(args.run_dir)
     records = _collect(run_dir, "confirm")
-    by_cell: dict[str, dict[str, dict[int, dict]]] = {}
-    for record in records:
-        by_cell.setdefault(record["cell"], {}).setdefault(record["profile_id"], {})[
-            record["seed"]
-        ] = record
+    by_cell = index_records(records)
 
     summary: dict[str, dict] = {}
     print(
@@ -710,8 +637,8 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> None:
-    args = build_parser().parse_args()
+def main(argv: list[str] | None = None) -> None:
+    args = build_parser().parse_args(argv)
     args.func(args)
 
 

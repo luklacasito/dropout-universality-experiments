@@ -26,7 +26,7 @@ fi
 test -f "${DATA_ROOT}/benchmarks/tiny_imagenet.npz"
 mkdir -p "${RUN_DIR}/logs"
 
-python experiments/benchmark/run_tiny_imagenet_pilot.py plan \
+python -m dropout_mft.experiments.benchmark vision plan \
   --run-dir "${RUN_DIR}" --stage lr_search --depth 12
 
 common="PROJECT_DIR=${PROJECT_DIR},RUN_DIR=${RUN_DIR},VENV_DIR=${VENV_DIR}"

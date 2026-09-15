@@ -35,7 +35,7 @@ if [[ ! -f "${DATA_ROOT}/benchmarks/tiny_imagenet.npz" ]]; then
 fi
 
 mkdir -p "${RUN_DIR}/logs"
-python experiments/benchmark/run_tiny_imagenet_zero_decay.py plan \
+python -m dropout_mft.experiments.benchmark vision_zero_decay plan \
   --run-dir "${RUN_DIR}" --stage lr_search --depth 12
 
 common="PROJECT_DIR=${PROJECT_DIR},RUN_DIR=${RUN_DIR},VENV_DIR=${VENV_DIR}"
@@ -65,9 +65,9 @@ submit_select_and_plan() {
   local stage="$1" next_stage="$2" dependency="$3" job_name="$4"
   local wrap
   wrap="source ${VENV_DIR}/bin/activate && cd ${PROJECT_DIR} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run.py select \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark benchmark select \
 --run-dir ${RUN_DIR} --stage ${stage} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run_tiny_imagenet_zero_decay.py plan \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark vision_zero_decay plan \
 --run-dir ${RUN_DIR} --stage ${next_stage} --depth 12"
   sbatch --parsable "${SBATCH_ARGS[@]}" \
     --dependency="afterok:${dependency}" \
@@ -108,7 +108,7 @@ echo "vision wd0 confirm MLP    ${confirm_mlp}"
 echo "vision wd0 confirm ViT    ${confirm_vit}"
 
 aggregate_wrap="source ${VENV_DIR}/bin/activate && cd ${PROJECT_DIR} && \
-PYTHONPATH=${PROJECT_DIR}/src python experiments/benchmark/run.py aggregate \
+PYTHONPATH=${PROJECT_DIR}/src python -m dropout_mft.experiments.benchmark benchmark aggregate \
 --run-dir ${RUN_DIR}"
 aggregate_job=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
   --dependency="afterok:${confirm_mlp}:${confirm_vit}" \
@@ -120,9 +120,9 @@ aggregate_job=$(sbatch --parsable "${SBATCH_ARGS[@]}" \
 echo "aggregate                 ${aggregate_job}"
 
 echo
-python experiments/benchmark/run_tiny_imagenet_zero_decay.py cost
+python -m dropout_mft.experiments.benchmark vision_zero_decay cost
 echo "At most $((2 * CONCURRENT_PER_MODEL)) H100s run concurrently."
 echo "Each full array task owns one trial; canary success gates the full chain."
 echo "CHAIN_JOBS=${canary_mlp},${canary_vit},${lr_mlp},${lr_vit},${select_lr},${budget_mlp},${budget_vit},${select_budget},${confirm_mlp},${confirm_vit},${aggregate_job}"
-echo "Track: python experiments/benchmark/run.py status --run-dir ${RUN_DIR}"
+echo "Track: python -m dropout_mft.experiments.benchmark benchmark status --run-dir ${RUN_DIR}"
 echo "W&B spool: ${RUN_DIR}/wandb"

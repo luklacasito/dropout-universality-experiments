@@ -13,7 +13,6 @@ import tarfile
 from pathlib import Path
 from typing import Iterable
 
-
 PROVENANCE_SCHEMA_VERSION = 1
 _EXCLUDED_DIRECTORY_NAMES = {
     ".git",
@@ -557,3 +556,62 @@ def load_frozen_provenance(
                 "restore the frozen source archive or use a new run directory."
             )
     return record
+
+
+def git_commit() -> str:
+    """Read HEAD without forking after PyTorch has started worker threads."""
+
+    git_entry = repository_root() / ".git"
+    try:
+        if git_entry.is_file():
+            pointer = git_entry.read_text().strip()
+            if not pointer.startswith("gitdir:"):
+                return "unknown"
+            git_dir = (git_entry.parent / pointer.split(":", 1)[1].strip()).resolve()
+        else:
+            git_dir = git_entry
+        head = (git_dir / "HEAD").read_text().strip()
+        if not head.startswith("ref:"):
+            return head
+        reference = head.split(":", 1)[1].strip()
+        loose_ref = git_dir / reference
+        if loose_ref.exists():
+            return loose_ref.read_text().strip()
+        for line in (git_dir / "packed-refs").read_text().splitlines():
+            if line and not line.startswith(("#", "^")):
+                commit, name = line.split(" ", 1)
+                if name == reference:
+                    return commit
+    except (OSError, ValueError):
+        pass
+    return "unknown"
+
+
+def runtime_provenance(device: str, source: dict | None) -> dict:
+    import numpy as np
+    import torch
+
+    slurm_keys = (
+        "SLURM_JOB_ID",
+        "SLURM_ARRAY_JOB_ID",
+        "SLURM_ARRAY_TASK_ID",
+        "SLURM_CLUSTER_NAME",
+        "SLURMD_NODENAME",
+    )
+    runtime = {
+        "git_commit": git_commit(),
+        "python_version": platform.python_version(),
+        "torch_version": torch.__version__,
+        "numpy_version": np.__version__,
+        "device": device,
+        "slurm": {
+            key.lower(): os.environ[key] for key in slurm_keys if key in os.environ
+        },
+    }
+    return {
+        "source": source,
+        "source_provenance_sha256": (
+            provenance_sha256(source) if source is not None else None
+        ),
+        "runtime": runtime,
+    }

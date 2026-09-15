@@ -12,7 +12,6 @@ import pandas as pd
 import wandb
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
-
 EXPECTED_RUNS = 50
 EXPECTED_EPOCHS = 30
 METRIC_KEYS = ("epoch", "train/rmspe", "validation/rmspe")
@@ -74,7 +73,9 @@ def export_histories(args: argparse.Namespace) -> tuple[pd.DataFrame, bool]:
         history = run.history(samples=100, keys=list(METRIC_KEYS), pandas=True)
         history = history.dropna(subset=list(METRIC_KEYS)).copy()
         if len(history) != EXPECTED_EPOCHS:
-            raise RuntimeError(f"{run.id}: expected 30 history rows, found {len(history)}")
+            raise RuntimeError(
+                f"{run.id}: expected 30 history rows, found {len(history)}"
+            )
         addition = pd.DataFrame(
             {
                 "architecture": config["architecture"],

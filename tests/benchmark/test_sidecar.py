@@ -7,6 +7,13 @@ from dataclasses import replace
 import numpy as np
 import pytest
 
+from dropout_mft.experiments.benchmark.protocol import (
+    BENCHMARK_SCHEMA_VERSION,
+    CONFIRM_SEEDS,
+    SIDECAR_PROFILE_IDS,
+    TUNED_CONTROL_PROFILE_ID,
+    benchmark_profile_layers,
+)
 from dropout_mft.experiments.benchmark.sidecar import (
     SIDECAR_COHORT_ID,
     SIDECAR_DATASETS,
@@ -14,13 +21,6 @@ from dropout_mft.experiments.benchmark.sidecar import (
     sidecar_confirm_specs,
     sidecar_lr_search_specs,
     sidecar_trial_count,
-)
-from dropout_mft.experiments.benchmark.protocol import (
-    BENCHMARK_SCHEMA_VERSION,
-    CONFIRM_SEEDS,
-    SIDECAR_PROFILE_IDS,
-    TUNED_CONTROL_PROFILE_ID,
-    benchmark_profile_layers,
 )
 
 

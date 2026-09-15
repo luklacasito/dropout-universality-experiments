@@ -14,8 +14,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-import dropout_mft.experiments.legacy.protocol as legacy_module
 
+import dropout_mft.experiments.legacy.protocol as legacy_module
 from dropout_mft.experiments.legacy.analysis import (
     REFERENCE_PROFILE_MAP,
     paired_comparison_rows,
@@ -39,7 +39,6 @@ from dropout_mft.provenance import (
 )
 from dropout_mft.results import load_npz_result
 from dropout_mft.style import apply_paper_style
-
 
 SAVED_ORIGINAL_SHA256 = (
     "0c347bca4756e65f7409388daf43519a02d58807f3b44dae0af62ba6f48496a7"

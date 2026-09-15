@@ -27,10 +27,9 @@ from torch import nn
 
 from dropout_mft.models import MLPConfig, build_mlp
 from dropout_mft.provenance import provenance_sha256
-from dropout_mft.results import load_npz_result, save_npz_result
-from dropout_mft.schedules import power_profile_layers, schedule_layers
+from dropout_mft.results import load_npz_result, save_npz_result_atomic
+from dropout_mft.schedules import named_profile_layers
 from dropout_mft.training import seed_everything
-
 
 LEGACY_SCHEMA_VERSION = 1
 LEGACY_PHASE = "legacy_apples_to_apples"
@@ -173,35 +172,9 @@ def legacy_trial_specs(
 def legacy_profile_layers(spec: LegacyTrialSpec) -> list[float]:
     """Build the exact legacy references and exact-budget new power profiles."""
 
-    if spec.profile_id == "uniform":
-        values = schedule_layers(
-            "constant", spec.depth, spec.mean_dropout, spec.max_dropout
-        )
-    elif spec.profile_id == "linear_early":
-        # This is the notebook's ``reverse_linear`` profile, including its
-        # endpoint samples 0.2,...,0.0 rather than cell-center samples.
-        values = schedule_layers(
-            "reverse_linear", spec.depth, spec.mean_dropout, spec.max_dropout
-        )
-    elif spec.profile_id == "step_early":
-        values = schedule_layers(
-            "reverse_step", spec.depth, spec.mean_dropout, spec.max_dropout
-        )
-    elif spec.profile_id in {"quadratic_early", "quartic_early"}:
-        power = 2.0 if spec.profile_id == "quadratic_early" else 4.0
-        values = power_profile_layers(
-            spec.depth,
-            spec.mean_dropout,
-            power,
-            orientation="early",
-            h_max=spec.max_dropout,
-        )
-    elif spec.profile_id == "big_step":
-        values = schedule_layers(
-            "big_step", spec.depth, spec.mean_dropout, spec.max_dropout
-        )
-    else:  # Defensive guard for future profile additions.
-        raise ValueError(f"Unknown legacy profile: {spec.profile_id!r}")
+    values = named_profile_layers(
+        spec.profile_id, spec.depth, spec.mean_dropout, spec.max_dropout
+    )
     if not math.isclose(
         float(np.mean(values)), spec.mean_dropout, rel_tol=0.0, abs_tol=1e-12
     ):
@@ -641,8 +614,5 @@ def run_legacy_trial(
         "runtime": metadata["runtime"],
         "provenance": {"source_provenance_sha256": provenance_hash},
     }
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = output_path.with_name(f"{output_path.stem}.{os.getpid()}.tmp.npz")
-    save_npz_result(temporary, result)
-    os.replace(temporary, output_path)
+    save_npz_result_atomic(output_path, result)
     return result

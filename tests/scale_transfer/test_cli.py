@@ -11,7 +11,6 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from dropout_mft.results import load_npz_result, save_npz_result
 from dropout_mft.experiments.scale_transfer.protocol import (
     mup_transfer_specs,
     mup_tune_extension_specs,
@@ -19,9 +18,11 @@ from dropout_mft.experiments.scale_transfer.protocol import (
     read_manifest,
     write_manifest,
 )
+from dropout_mft.results import load_npz_result, save_npz_result
 
-
-SCRIPT = Path(__file__).resolve().parents[2] / "experiments" / "scale_transfer" / "run.py"
+SCRIPT = (
+    Path(__file__).resolve().parents[2] / "experiments" / "scale_transfer" / "run.py"
+)
 SPEC = importlib.util.spec_from_file_location("run_scale_transfer", SCRIPT)
 assert SPEC and SPEC.loader
 CLI = importlib.util.module_from_spec(SPEC)
